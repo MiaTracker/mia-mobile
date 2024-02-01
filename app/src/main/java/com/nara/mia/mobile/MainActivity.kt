@@ -37,6 +37,7 @@ import com.nara.mia.mobile.pages.IndexPage
 import com.nara.mia.mobile.pages.InstanceSelectionPage
 import com.nara.mia.mobile.pages.LoginPage
 import com.nara.mia.mobile.pages.MoviePage
+import com.nara.mia.mobile.pages.SeriesPage
 import com.nara.mia.mobile.services.Http
 import com.nara.mia.mobile.services.Service
 import com.nara.mia.mobile.view_models.InstanceSelectionViewModel
@@ -45,6 +46,7 @@ import com.nara.mia.mobile.view_models.MediaIndexViewModel
 import com.nara.mia.mobile.view_models.MovieViewModel
 import com.nara.mia.mobile.view_models.MoviesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesIndexViewModel
+import com.nara.mia.mobile.view_models.SeriesViewModel
 import kotlinx.coroutines.runBlocking
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "config")
@@ -168,7 +170,7 @@ fun Navigation() {
                 )
             }
         }
-        composable("movie/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType})) {
+        composable("movie/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) {
             MoviePage(
                 viewModel(
                     initializer = {
@@ -176,6 +178,16 @@ fun Navigation() {
                     }
                 ),
                 navController
+            )
+        }
+        composable("series/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) {
+            SeriesPage(
+                viewModel = viewModel(
+                    initializer = {
+                        SeriesViewModel(it.arguments!!.getInt("id"))
+                    }
+                ),
+                navController = navController
             )
         }
     }
