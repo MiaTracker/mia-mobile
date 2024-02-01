@@ -40,17 +40,26 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     abstract suspend fun index(): Response<List<MediaIndex>>
+    abstract fun title(): String
 }
 
 class MediaIndexViewModel : IndexViewModel() {
     override suspend fun index(): Response<List<MediaIndex>> {
         return Service.media.index()
     }
+
+    override fun title(): String {
+        return "All media"
+    }
 }
 
 class MoviesIndexViewModel : IndexViewModel() {
     override suspend fun index(): Response<List<MediaIndex>> {
         return Service.movies.index()
+    }
+
+    override fun title(): String {
+        return "Movies"
     }
 }
 
@@ -59,4 +68,7 @@ class SeriesIndexViewModel : IndexViewModel() {
         return Service.series.index()
     }
 
+    override fun title(): String {
+        return "Series"
+    }
 }
