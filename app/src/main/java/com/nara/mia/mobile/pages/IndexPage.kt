@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +51,11 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
         topBar = {
             TopBar(navController = navController, drawerState = drawerState) {
                 Text(text = viewModel.title())
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("log") }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add log")
             }
         }
     ) { padding ->
@@ -88,7 +97,7 @@ fun Poster(index: MediaIndex, navController: NavController) {
             }
     ) {
         AsyncImage(
-            model = imageUrl(index.posterPath),
+            model = imageUrl(index.posterPath ?: ""),
             contentDescription = index.title
         )
         Text(text = index.title, softWrap = true, textAlign = TextAlign.Center)

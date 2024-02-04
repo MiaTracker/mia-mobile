@@ -35,6 +35,7 @@ import com.nara.mia.mobile.infrastructure.isInstanceUrlInitialized
 import com.nara.mia.mobile.infrastructure.isTokenPresent
 import com.nara.mia.mobile.pages.IndexPage
 import com.nara.mia.mobile.pages.InstanceSelectionPage
+import com.nara.mia.mobile.pages.LogPage
 import com.nara.mia.mobile.pages.LoginPage
 import com.nara.mia.mobile.pages.MoviePage
 import com.nara.mia.mobile.pages.SeriesPage
@@ -189,6 +190,9 @@ fun Navigation() {
                 ),
                 navController = navController
             )
+        }
+        composable("log") {
+            LogPage(navController = navController)
         }
     }
 }

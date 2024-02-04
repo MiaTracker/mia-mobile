@@ -9,6 +9,7 @@ object Service {
     lateinit var media: Media
     lateinit var movies: Movies
     lateinit var series: Series
+    lateinit var logset: Logset
 
     fun init() {
         if(initialized || !isInstanceUrlInitialized()) return
@@ -17,6 +18,7 @@ object Service {
         media = ServiceFactory.create(Media::class)
         movies = ServiceFactory.create(Movies::class)
         series = ServiceFactory.create(Series::class)
+        logset = ServiceFactory.create(Logset::class)
 
         initialized = true
     }

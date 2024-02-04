@@ -1,5 +1,7 @@
 package com.nara.mia.mobile.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.nara.mia.mobile.infrastructure.Config
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -17,9 +19,12 @@ class ServiceFactory {
             val request = chain.request().newBuilder().addHeader("Authorization", "Bearer " + Config.run!!.token).build()
             return@Interceptor chain.proceed(request)
         })
+        val om = ObjectMapper()
+        om.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+
         builder = Retrofit.Builder()
             .baseUrl(getBaseUrl())
-            .addConverterFactory(JacksonConverterFactory.create())
+            .addConverterFactory(JacksonConverterFactory.create(om))
             .client(client.build())
             .build()
     }
@@ -42,4 +47,3 @@ class ServiceFactory {
         }
     }
 }
-
