@@ -1,8 +1,11 @@
 package com.nara.mia.mobile.models
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Date
 
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class Log(
     @JsonProperty("id") val id: Int,
     @JsonProperty("date") val date: Date,

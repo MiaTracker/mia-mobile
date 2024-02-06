@@ -2,14 +2,15 @@ package com.nara.mia.mobile.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.nara.mia.mobile.enums.MediaType
+import com.nara.mia.mobile.enums.SourceType
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.IIndex
 import com.nara.mia.mobile.models.Logset
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
+import com.nara.mia.mobile.models.SourceCreate
 import com.nara.mia.mobile.services.Service
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,9 @@ data class LogState(
     val mediaResults: SearchResults? = null,
     val source: Source? = null,
     val sources: Vector<Source>? = null,
+    val newSourceName: String = "",
+    val newSourceType: SourceType? = null,
+    val newSourceUrl: String = "",
     val dateString: String = "",
     val date: Date? = null,
     val stars: Float? = null,
@@ -72,7 +76,7 @@ class LogViewModel : ViewModel() {
         refreshOnWatchlist()
     }
 
-    fun sourceSelected(source: Source) {
+    fun sourceSelected(source: Source?) {
         _state.update { state ->
             state.copy(
                 source = source
@@ -173,7 +177,32 @@ class LogViewModel : ViewModel() {
     }
 
     fun filled(): Boolean {
-        return state.value.index != null && state.value.source != null && state.value.date != null
+        return state.value.index != null && state.value.date != null &&
+                (state.value.source != null || state.value.newSourceType != null)
+    }
+
+    fun setNewSourceName(name: String) {
+        _state.update { state ->
+            state.copy(
+                newSourceName = name
+            )
+        }
+    }
+
+    fun newSourceTypeSelected(sourceType: SourceType) {
+        _state.update { state ->
+            state.copy(
+                newSourceType = sourceType
+            )
+        }
+    }
+
+    fun setNewSourceUrl(url: String) {
+        _state.update { state ->
+            state.copy(
+                newSourceUrl = url
+            )
+        }
     }
 
     fun save() {
@@ -184,26 +213,18 @@ class LogViewModel : ViewModel() {
                 externalId = if(state.value.index is ExternalIndex) { (state.value.index as ExternalIndex).externalId } else { null },
                 mediaType = state.value.index!!.type,
                 source = if(state.value.source != null) { state.value.source!!.name } else { null },
-                newSource = null,
+                newSource = if(state.value.source == null) { SourceCreate(
+                        name = state.value.newSourceName,
+                        type = state.value.newSourceType!!,
+                        url = state.value.newSourceUrl
+                    )
+                } else { null },
                 date = state.value.date!!,
                 stars = state.value.stars,
                 completed = state.value.completed,
                 comment = state.value.comment,
                 removeFromWatchlist = if(state.value.onWatchlist) { state.value.removeFromWatchlist } else { null }
             )
-
-            val y = ExternalIndex(
-                externalId = 3,
-                type = MediaType.Movie,
-                posterPath = "sadf",
-                title = "asdf"
-            )
-
-            val mapper = ObjectMapper()
-            val x = mapper.writeValueAsString(model)
-            val z = mapper.writeValueAsString(y)
-            println(x)
-            println(z)
 
             val res = Service.logset.create(model)
             if(!res.isSuccessful) return@launch //TODO: handle

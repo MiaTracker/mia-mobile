@@ -1,10 +1,12 @@
 package com.nara.mia.mobile.models
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.nara.mia.mobile.enums.MediaType
 import java.util.Date
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class Logset(
     @JsonProperty("media_id") val mediaId: Int?,
     @JsonProperty("external_id") val externalId: Int?,

@@ -29,9 +29,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SelectableDates
@@ -49,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,9 +61,9 @@ import coil.compose.AsyncImage
 import com.nara.mia.mobile.infrastructure.imageUrl
 import com.nara.mia.mobile.view_models.LogViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.MediaType
+import com.nara.mia.mobile.enums.SourceType
 import com.nara.mia.mobile.models.IIndex
 import java.time.Clock
 import java.time.Instant
@@ -69,11 +72,12 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController) {
+fun LogPage(viewModel: LogViewModel = viewModel(), onClose: () -> Unit) {
     val state by viewModel.state.collectAsState()
 
     var openDialog by remember { mutableStateOf(false) }
     var sourceExpanded by remember { mutableStateOf(false) }
+    var newSourceTypeExpanded by remember { mutableStateOf(false) }
     val datepickerState = rememberDatePickerState(
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
@@ -103,10 +107,10 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
             modifier = Modifier
                 .height(90.dp)
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .border(
                     1.dp,
-                    MaterialTheme.colorScheme.outline,
+                    MaterialTheme.colorScheme.onSurfaceVariant,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .clickable {
@@ -114,17 +118,26 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
                 }
         ) {
             if(state.index != null) {
-                IndexListItem(idx = state.index!!, external = state.externalIndex)
+                IndexListItem(
+                    idx = state.index!!,
+                    external = state.externalIndex,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                )
             } else {
                 Text(
                     text = "Select media",
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.CenterStart)
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
                         .padding(start = 10.dp)
                 )
             }
         }
 
+        if(state.index != null && state.source == null) {
+            HorizontalDivider()
+        }
         Row(
             Modifier.fillMaxWidth()
         ) {
@@ -134,7 +147,7 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
                 Modifier.weight(1.0f)
             ) {
                 TextField(
-                    value = state.source?.name ?: "",
+                    value = state.source?.name ?: "New source",
                     enabled = state.index != null,
                     readOnly = true,
                     onValueChange = { },
@@ -164,7 +177,10 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
                     }
                     DropdownMenuItem(
                         text = { Text(text = "New source") },
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            viewModel.sourceSelected(null)
+                            sourceExpanded = false
+                        },
                         leadingIcon = {
                             Icon(imageVector = Icons.Default.Add, contentDescription = "New source")
                         },
@@ -180,6 +196,62 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
             ) {
                 Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
             }
+        }
+
+        if(state.index != null && state.source == null) {
+            TextField(
+                value = state.newSourceName,
+                onValueChange = { viewModel.setNewSourceName(it) },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Box {
+                ExposedDropdownMenuBox(
+                    expanded = newSourceTypeExpanded,
+                    onExpandedChange = { newSourceTypeExpanded = it }
+                ) {
+                    TextField(
+                        value = state.newSourceType?.toString() ?: "",
+                        readOnly = true,
+                        onValueChange = { },
+                        label = { Text(text = "Type") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = newSourceTypeExpanded)
+                        },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = newSourceTypeExpanded,
+                        onDismissRequest = { newSourceTypeExpanded = false },
+                        Modifier.fillMaxWidth()
+                    ) {
+                        enumValues<SourceType>().forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(text = type.toString()) },
+                                onClick = {
+                                    viewModel.newSourceTypeSelected(type)
+                                    newSourceTypeExpanded = false
+                                },
+                                Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row {
+                TextField(
+                    value = state.newSourceUrl,
+                    onValueChange = { viewModel.setNewSourceUrl(it) },
+                    label = { Text("Url") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            HorizontalDivider()
         }
 
         Row(
@@ -275,13 +347,13 @@ fun LogPage(viewModel: LogViewModel = viewModel(), navController: NavController)
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedButton(onClick = { navController.popBackStack() }) {
+            OutlinedButton(onClick = { onClose() }) {
                 Text("Cancel")
             }
             Button(
                 onClick = {
                     viewModel.save()
-                    navController.popBackStack()
+                    onClose()
                 },
                 enabled = viewModel.filled()
             ) {
@@ -356,13 +428,13 @@ fun MediaSelectionDialog(viewModel: LogViewModel, dismiss: () -> Unit) {
 }
 
 @Composable
-fun IndexListItem(idx: IIndex, external: Boolean, onClick: (() -> Unit)? = null) {
-    val modifier = if(onClick != null) {
-        Modifier.clickable {
+fun IndexListItem(idx: IIndex, external: Boolean, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val m = if(onClick != null) {
+        modifier.clickable {
             onClick()
         }
     } else {
-        Modifier
+        modifier
     }
 
     ListItem(
@@ -399,6 +471,7 @@ fun IndexListItem(idx: IIndex, external: Boolean, onClick: (() -> Unit)? = null)
                 }
             }
         },
-        modifier = modifier
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        modifier = m
     )
 }

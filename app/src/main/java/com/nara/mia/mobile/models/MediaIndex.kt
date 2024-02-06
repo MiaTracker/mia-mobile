@@ -1,8 +1,10 @@
 package com.nara.mia.mobile.models
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.nara.mia.mobile.enums.MediaType
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class MediaIndex(
     @JsonProperty("id") val id: Int,
     @JsonProperty("type") override val type: MediaType,

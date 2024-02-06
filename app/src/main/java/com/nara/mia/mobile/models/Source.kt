@@ -1,8 +1,10 @@
 package com.nara.mia.mobile.models
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.nara.mia.mobile.enums.SourceType
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class Source(
     @JsonProperty("id") val id: Int,
     @JsonProperty("name") val name: String,

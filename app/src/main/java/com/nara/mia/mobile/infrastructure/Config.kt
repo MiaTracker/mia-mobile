@@ -13,9 +13,12 @@ import java.util.Locale
 
 
 object Config {
+    val configChanged = Signal()
+
     var run: RunConfig? = null
 
     suspend fun init(dataStore: DataStore<Preferences>, callback: () -> Unit) {
+        if(run != null) callback()
         run = RunConfig.load(dataStore)
         callback()
     }
@@ -35,6 +38,7 @@ class RunConfig private constructor(private val dataStore: DataStore<Preferences
             preferences[instanceKey] = url
         }
         instance = url
+        Config.configChanged()
     }
 
     suspend fun setToken(token: UserToken) {
@@ -44,6 +48,7 @@ class RunConfig private constructor(private val dataStore: DataStore<Preferences
         }
         this.token = token.token
         this.tokenExpiryDate = token.expiryDate
+        Config.configChanged()
     }
 
     fun validateToken(): Boolean {
