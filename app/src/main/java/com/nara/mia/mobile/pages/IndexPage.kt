@@ -88,7 +88,7 @@ fun Poster(index: MediaIndex, navController: NavController) {
             }
     ) {
         AsyncImage(
-            model = imageUrl(index.posterPath),
+            model = imageUrl(index.posterPath ?: ""),
             contentDescription = index.title
         )
         Text(text = index.title, softWrap = true, textAlign = TextAlign.Center)

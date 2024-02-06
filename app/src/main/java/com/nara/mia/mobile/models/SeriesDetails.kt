@@ -1,9 +1,11 @@
 package com.nara.mia.mobile.models
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Date
 import java.util.Vector
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class SeriesDetails(
     @JsonProperty("id") override val id: Int,
     @JsonProperty("poster_path") override val posterPath: String?,

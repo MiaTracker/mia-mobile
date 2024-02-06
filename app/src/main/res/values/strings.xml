@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mia</string>
+    <string name="add_log_tile_label">Add media log</string>
 </resources>

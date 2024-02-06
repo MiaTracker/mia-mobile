@@ -1,12 +1,17 @@
 package com.nara.mia.mobile
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -18,9 +23,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.compose.ui.unit.dp
 import com.nara.mia.mobile.ui.theme.MiaTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -31,10 +34,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.nara.mia.mobile.infrastructure.Config
+import com.nara.mia.mobile.infrastructure.PrefDataStore
 import com.nara.mia.mobile.infrastructure.isInstanceUrlInitialized
 import com.nara.mia.mobile.infrastructure.isTokenPresent
 import com.nara.mia.mobile.pages.IndexPage
 import com.nara.mia.mobile.pages.InstanceSelectionPage
+import com.nara.mia.mobile.pages.LogPage
 import com.nara.mia.mobile.pages.LoginPage
 import com.nara.mia.mobile.pages.MoviePage
 import com.nara.mia.mobile.pages.SeriesPage
@@ -49,14 +54,13 @@ import com.nara.mia.mobile.view_models.SeriesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesViewModel
 import kotlinx.coroutines.runBlocking
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "config")
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         runBlocking {
-            Config.init(baseContext.dataStore) {
+            Config.init(PrefDataStore.get(baseContext)) {
                 if (isInstanceUrlInitialized()) {
                     val connected = runBlocking {
                         Http.testConnection(Config.run?.instance)
@@ -190,6 +194,9 @@ fun Navigation() {
                 navController = navController
             )
         }
+        composable("log") {
+            LogPage { navController.popBackStack() }
+        }
     }
 }
 
@@ -218,6 +225,18 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                     selected = (currentRoute == "series"),
                     onClick = { navController.navigate("series") }
                 )
+                Spacer(modifier = Modifier.weight(2.0f))
+                NavigationDrawerItem(
+                    label = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                            Text(text = "New log")
+                        }
+                    },
+                    selected = (currentRoute == "log"),
+                    onClick = { navController.navigate("log") })
             }
         }) {
         page(drawerState)
