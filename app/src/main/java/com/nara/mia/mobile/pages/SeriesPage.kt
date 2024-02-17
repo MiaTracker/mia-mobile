@@ -26,8 +26,7 @@ fun SeriesPage(viewModel: SeriesViewModel, navController: NavController) {
     Details(
         media = series,
         navController = navController,
-        onRefresh = viewModel::refresh,
-        isLoading = state.isLoading
+        onRefresh = viewModel::refresh
     ) {
         Text(text = series.status ?: "")
         Text(text = firstAirDate)

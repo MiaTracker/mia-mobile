@@ -12,30 +12,22 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 data class IndexState(
-    val index: List<MediaIndex> = emptyList(),
-    val isLoading: Boolean = false
+    val index: List<MediaIndex>? = null,
 )
 
 abstract class IndexViewModel : ViewModel() {
     private val _state = MutableStateFlow(IndexState())
     val state: StateFlow<IndexState> = _state.asStateFlow()
 
-    init {
-        refresh()
-    }
-
-    fun refresh() {
+    fun refresh(callback: () -> Unit) {
         viewModelScope.launch {
-            _state.update {
-                _state.value.copy(isLoading = true)
-            }
             val res = index()
             _state.update { state ->
                 state.copy(
                     index = res.body() ?: emptyList(),
-                    isLoading = false
                 )
             }
+            callback()
         }
     }
 

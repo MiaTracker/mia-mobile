@@ -12,29 +12,21 @@ import kotlinx.coroutines.launch
 
 data class SeriesState(
     val series: SeriesDetails? = null,
-    val isLoading: Boolean = false
 )
 
 class SeriesViewModel(private val id: Int) : ViewModel() {
     private val _state = MutableStateFlow(SeriesState())
     val state: StateFlow<SeriesState> = _state.asStateFlow()
 
-    init {
-        refresh()
-    }
-
-    fun refresh() {
+    fun refresh(callback: () -> Unit) {
         viewModelScope.launch {
-            _state.update {
-                _state.value.copy(isLoading = true)
-            }
             val res = Service.series.details(id)
             _state.update { state ->
                 state.copy(
                     series = res.body(),
-                    isLoading = false
                 )
             }
+            callback()
         }
     }
 }

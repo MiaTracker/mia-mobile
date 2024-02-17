@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class MovieState(
-    val movie: MovieDetails? = null,
-    val isLoading: Boolean = false
+    val movie: MovieDetails? = null
 )
 
 class MovieViewModel(private val id: Int) : ViewModel() {
@@ -20,21 +19,18 @@ class MovieViewModel(private val id: Int) : ViewModel() {
     val state: StateFlow<MovieState> = _state.asStateFlow()
 
     init {
-        refresh()
+        refresh { }
     }
 
-    fun refresh() {
+    fun refresh(callback: () -> Unit) {
         viewModelScope.launch {
-            _state.update {
-                _state.value.copy(isLoading = true)
-            }
             val res = Service.movies.details(id)
             _state.update { state ->
                 state.copy(
                     movie = res.body(),
-                    isLoading = false
                 )
             }
+            callback()
         }
     }
 }

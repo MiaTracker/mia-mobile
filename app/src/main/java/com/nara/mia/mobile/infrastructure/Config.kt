@@ -52,7 +52,7 @@ class RunConfig private constructor(private val dataStore: DataStore<Preferences
     }
 
     fun validateToken(): Boolean {
-        if(tokenExpiryDate != null && tokenExpiryDate!! < Date()) {
+        if(tokenExpiryDate == null || tokenExpiryDate!! < Date()) {
             token = null
             tokenExpiryDate = null
             return false

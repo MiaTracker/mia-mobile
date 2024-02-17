@@ -26,8 +26,7 @@ fun MoviePage(viewModel: MovieViewModel, navController: NavController) {
     Details(
         media = movie,
         navController = navController,
-        onRefresh = viewModel::refresh,
-        isLoading = state.isLoading
+        onRefresh = viewModel::refresh
     ) {
         Text(text = movie.status ?: "")
         Text(text = releaseYear)
