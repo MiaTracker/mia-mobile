@@ -20,6 +20,7 @@ object Config {
     suspend fun init(dataStore: DataStore<Preferences>, callback: () -> Unit) {
         if(run != null) callback()
         run = RunConfig.load(dataStore)
+        configChanged += callback
         callback()
     }
 }
@@ -58,6 +59,16 @@ class RunConfig private constructor(private val dataStore: DataStore<Preferences
             return false
         }
         return true
+    }
+
+    suspend fun clearToken() {
+        dataStore.edit { preferences ->
+            preferences.remove(tokenKey)
+            preferences.remove(tokenExpiryDateKey)
+        }
+        this.token = null
+        this.tokenExpiryDate = null
+        Config.configChanged()
     }
 
     companion object {

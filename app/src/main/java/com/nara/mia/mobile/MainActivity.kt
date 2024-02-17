@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nara.mia.mobile.ui.theme.MiaTheme
@@ -52,6 +54,7 @@ import com.nara.mia.mobile.view_models.MovieViewModel
 import com.nara.mia.mobile.view_models.MoviesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesViewModel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
@@ -61,19 +64,23 @@ class MainActivity : ComponentActivity() {
 
         runBlocking {
             Config.init(PrefDataStore.get(baseContext)) {
-                if (isInstanceUrlInitialized()) {
-                    val connected = runBlocking {
-                        Http.testConnection(Config.run?.instance)
-                    }
-                    if(connected) {
-                        Service.init()
-                        if(isTokenPresent()) setNavigation()
-                        else setLoginPage()
-                    } else setInstanceSelectionPage()
-                } else {
-                    setInstanceSelectionPage()
-                }
+                setInitialPage()
             }
+        }
+    }
+
+    private fun setInitialPage() {
+        if (isInstanceUrlInitialized()) {
+            val connected = runBlocking {
+                Http.testConnection(Config.run?.instance)
+            }
+            if(connected) {
+                Service.init()
+                if(isTokenPresent()) setNavigation()
+                else setLoginPage()
+            } else setInstanceSelectionPage()
+        } else {
+            setInstanceSelectionPage()
         }
     }
 
@@ -205,6 +212,7 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: "media"
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val coroutineScope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -237,6 +245,22 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                     },
                     selected = (currentRoute == "log"),
                     onClick = { navController.navigate("log") })
+                NavigationDrawerItem(
+                    label = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
+                            Text(text = "Logout")
+                        }
+                    },
+                    selected = false,
+                    onClick = {
+                        coroutineScope.launch {
+                            Config.run?.clearToken()
+                        }
+                    }
+                )
             }
         }) {
         page(drawerState)
