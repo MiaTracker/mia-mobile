@@ -12,22 +12,22 @@ import java.util.Calendar
 @Composable
 fun MoviePage(viewModel: MovieViewModel, navController: NavController) {
     val state by viewModel.state.collectAsState()
-
-    val movie = state.movie ?: return
-
-    lateinit var releaseYear: String
-    if(movie.releaseDate == null) releaseYear = ""
-    else {
-        val calendar = Calendar.getInstance()
-        calendar.time = movie.releaseDate
-        releaseYear = calendar.get(Calendar.YEAR).toString()
-    }
+    val movie = state.movie
 
     Details(
         media = movie,
         navController = navController,
         onRefresh = viewModel::refresh
     ) {
+        movie ?: return@Details
+        lateinit var releaseYear: String
+        if(movie.releaseDate == null) releaseYear = ""
+        else {
+            val calendar = Calendar.getInstance()
+            calendar.time = movie.releaseDate
+            releaseYear = calendar.get(Calendar.YEAR).toString()
+        }
+
         Text(text = movie.status ?: "")
         Text(text = releaseYear)
         if(movie.runtime != null) {

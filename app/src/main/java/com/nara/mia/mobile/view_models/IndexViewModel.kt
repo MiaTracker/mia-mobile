@@ -64,3 +64,13 @@ class SeriesIndexViewModel : IndexViewModel() {
         return "Series"
     }
 }
+
+class WatchlistViewModel : IndexViewModel() {
+    override suspend fun index(): Response<List<MediaIndex>> {
+        return Service.watchlist.index()
+    }
+
+    override fun title(): String {
+        return "Watchlist"
+    }
+}

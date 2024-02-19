@@ -13,21 +13,23 @@ import java.util.Calendar
 fun SeriesPage(viewModel: SeriesViewModel, navController: NavController) {
     val state by viewModel.state.collectAsState()
 
-    val series = state.series ?: return
-
-    lateinit var firstAirDate: String
-    if(series.firstAirDate == null) firstAirDate = ""
-    else {
-        val calendar = Calendar.getInstance()
-        calendar.time = series.firstAirDate
-        firstAirDate = calendar.get(Calendar.YEAR).toString()
-    }
+    val series = state.series
 
     Details(
         media = series,
         navController = navController,
         onRefresh = viewModel::refresh
     ) {
+        series ?: return@Details
+
+        lateinit var firstAirDate: String
+        if(series.firstAirDate == null) firstAirDate = ""
+        else {
+            val calendar = Calendar.getInstance()
+            calendar.time = series.firstAirDate
+            firstAirDate = calendar.get(Calendar.YEAR).toString()
+        }
+
         Text(text = series.status ?: "")
         Text(text = firstAirDate)
         if(series.numberOfSeasons != null) {

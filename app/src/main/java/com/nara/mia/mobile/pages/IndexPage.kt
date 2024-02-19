@@ -16,13 +16,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -37,9 +38,12 @@ import com.nara.mia.mobile.view_models.IndexViewModel
 @Composable
 fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerState: DrawerState) {
     val state by viewModel.state.collectAsState()
-    val pullRefreshState = remember {
-        PullToRefreshState(70f, state.index == null)
+    val pullRefreshState = rememberPullToRefreshState()
+
+    LaunchedEffect(key1 = "") {
+        pullRefreshState.startRefresh()
     }
+
     if(pullRefreshState.isRefreshing) {
         viewModel.refresh { pullRefreshState.endRefresh() }
     }
@@ -55,6 +59,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .nestedScroll(pullRefreshState.nestedScrollConnection)
         ) {
             FlowRow(
                 Modifier

@@ -21,8 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
@@ -34,10 +36,12 @@ import java.util.Vector
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun Details(media: IMediaDetails?, navController: NavController, onRefresh: (() -> Unit) -> Unit, specifics: @Composable () -> Unit) {
-    val pullRefreshState = rememberPullToRefreshState(
-        positionalThreshold = 75.dp,
-    )
-    pullRefreshState.startRefresh()
+    val pullRefreshState = rememberPullToRefreshState()
+
+    LaunchedEffect(key1 = "") {
+        pullRefreshState.startRefresh()
+    }
+
     if(pullRefreshState.isRefreshing) {
         onRefresh { pullRefreshState.endRefresh() }
     }
@@ -53,6 +57,7 @@ fun Details(media: IMediaDetails?, navController: NavController, onRefresh: (() 
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(padding)
+            .nestedScroll(pullRefreshState.nestedScrollConnection)
         ) {
             if(media != null) {
                 val titles = buildTagString(media.alternativeTitles) { it.title }

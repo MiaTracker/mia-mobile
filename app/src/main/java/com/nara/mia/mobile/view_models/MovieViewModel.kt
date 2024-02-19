@@ -18,10 +18,6 @@ class MovieViewModel(private val id: Int) : ViewModel() {
     private val _state = MutableStateFlow(MovieState())
     val state: StateFlow<MovieState> = _state.asStateFlow()
 
-    init {
-        refresh { }
-    }
-
     fun refresh(callback: () -> Unit) {
         viewModelScope.launch {
             val res = Service.movies.details(id)

@@ -54,6 +54,7 @@ import com.nara.mia.mobile.view_models.MovieViewModel
 import com.nara.mia.mobile.view_models.MoviesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesViewModel
+import com.nara.mia.mobile.view_models.WatchlistViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -181,6 +182,15 @@ fun Navigation() {
                 )
             }
         }
+        composable("watchlist") {
+            BasePage(navController = navController) { drawerState ->
+                IndexPage(
+                    viewModel<WatchlistViewModel>(),
+                    navController,
+                    drawerState
+                )
+            }
+        }
         composable("movie/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType })) {
             MoviePage(
                 viewModel(
@@ -232,6 +242,11 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                     label = { Text(text = "Series") },
                     selected = (currentRoute == "series"),
                     onClick = { navController.navigate("series") }
+                )
+                NavigationDrawerItem(
+                    label = { Text(text = "Watchlist") },
+                    selected = (currentRoute == "watchlist"),
+                    onClick = { navController.navigate("watchlist") }
                 )
                 Spacer(modifier = Modifier.weight(2.0f))
                 NavigationDrawerItem(
