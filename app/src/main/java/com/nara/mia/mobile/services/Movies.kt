@@ -19,7 +19,7 @@ interface Movies {
     suspend fun search(@Query("query") query: String): Response<SearchResults>
 
     @POST("movies")
-    suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Unit>
+    suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Int>
 
     @GET("movies/{id}")
     suspend fun details(@Path("id") movieId: Int): Response<MovieDetails>

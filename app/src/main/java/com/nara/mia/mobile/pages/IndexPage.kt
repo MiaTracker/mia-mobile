@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DrawerState
@@ -142,7 +141,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             state.external?.forEach { idx ->
-                                Poster(index = idx)
+                                Poster(index = idx, Modifier.clickable { viewModel.create(idx, navController) })
                             }
                         }
                     }
@@ -181,7 +180,7 @@ fun Poster(index: IIndex, modifier: Modifier = Modifier) {
 
             if(index is ExternalIndex) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    painter = painterResource(id = R.drawable.baseline_link_24),
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.TopEnd)

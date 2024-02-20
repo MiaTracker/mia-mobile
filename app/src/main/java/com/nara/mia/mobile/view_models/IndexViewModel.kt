@@ -2,6 +2,8 @@ package com.nara.mia.mobile.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.SearchResults
@@ -35,6 +37,19 @@ abstract class IndexViewModel : ViewModel() {
             )
         }
         refresh()
+    }
+
+    fun create(idx: ExternalIndex, navController: NavController) {
+        viewModelScope.launch {
+            if(idx.type == MediaType.Movie) {
+                val res = Service.movies.create(idx.externalId) //TODO: handle
+                res.body()?.let { id -> navController.navigate("movie/${id}") }
+            } else {
+                val res = Service.series.create(idx.externalId) //TODO: handle
+                res.body()?.let { id -> navController.navigate("series/${id}") }
+            }
+            refresh()
+        }
     }
 
     private fun index(callback: (() -> Unit)?) {

@@ -19,7 +19,7 @@ interface Series {
     suspend fun search(@Query("query") query: String): Response<SearchResults>
 
     @POST("series")
-    suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Unit>
+    suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Int>
 
     @GET("series/{id}")
     suspend fun details(@Path("id") seriesId: Int): Response<SeriesDetails>
