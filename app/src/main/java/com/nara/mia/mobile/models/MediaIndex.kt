@@ -9,6 +9,6 @@ class MediaIndex(
     @JsonProperty("id") val id: Int,
     @JsonProperty("type") override val type: MediaType,
     @JsonProperty("poster_path") override val posterPath: String?,
-    @JsonProperty("stars") val stars: Float,
+    @JsonProperty("stars") val stars: Float?,
     @JsonProperty("title") override val title: String
 ) : IIndex

@@ -2,7 +2,9 @@ package com.nara.mia.mobile.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.MediaIndex
+import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.services.Service
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,31 +15,79 @@ import retrofit2.Response
 
 data class IndexState(
     val index: List<MediaIndex>? = null,
+    val external: List<ExternalIndex>? = null,
+    val query: String = ""
 )
 
 abstract class IndexViewModel : ViewModel() {
     private val _state = MutableStateFlow(IndexState())
     val state: StateFlow<IndexState> = _state.asStateFlow()
 
-    fun refresh(callback: () -> Unit) {
+    fun refresh(callback: (() -> Unit)? = null) {
+        if(state.value.query.isEmpty()) index(callback)
+        else search(callback)
+    }
+
+    fun applySearch(query: String) {
+        _state.update { state ->
+            state.copy(
+                query = query
+            )
+        }
+        refresh()
+    }
+
+    private fun index(callback: (() -> Unit)?) {
         viewModelScope.launch {
-            val res = index()
+            val res = apiIndex()
             _state.update { state ->
                 state.copy(
                     index = res.body() ?: emptyList(),
                 )
             }
-            callback()
+            callback?.invoke()
         }
     }
 
-    abstract suspend fun index(): Response<List<MediaIndex>>
+    private fun search(callback: (() -> Unit)?) {
+        viewModelScope.launch {
+            val res = apiSearch(state.value.query)
+            res.first?.let {
+                it.body()?.let { data ->
+                    _state.update { state ->
+                        state.copy(
+                            index = data.indexes,
+                            external = data.external
+                        )
+                    }
+                }
+            }
+            res.second?.let {
+                it.body()?.let { data ->
+                    _state.update { state ->
+                        state.copy(
+                            index = data
+                        )
+                    }
+                }
+            }
+
+            callback?.invoke()
+        }
+    }
+
+    abstract suspend fun apiIndex(): Response<List<MediaIndex>>
+    abstract suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?>
     abstract fun title(): String
 }
 
 class MediaIndexViewModel : IndexViewModel() {
-    override suspend fun index(): Response<List<MediaIndex>> {
+    override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.media.index()
+    }
+
+    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
+        return Pair(Service.media.search(query), null)
     }
 
     override fun title(): String {
@@ -46,8 +96,12 @@ class MediaIndexViewModel : IndexViewModel() {
 }
 
 class MoviesIndexViewModel : IndexViewModel() {
-    override suspend fun index(): Response<List<MediaIndex>> {
+    override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.movies.index()
+    }
+
+    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
+        return Pair(Service.movies.search(query), null)
     }
 
     override fun title(): String {
@@ -56,8 +110,12 @@ class MoviesIndexViewModel : IndexViewModel() {
 }
 
 class SeriesIndexViewModel : IndexViewModel() {
-    override suspend fun index(): Response<List<MediaIndex>> {
+    override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.series.index()
+    }
+
+    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
+        return Pair(Service.series.search(query), null)
     }
 
     override fun title(): String {
@@ -66,8 +124,12 @@ class SeriesIndexViewModel : IndexViewModel() {
 }
 
 class WatchlistViewModel : IndexViewModel() {
-    override suspend fun index(): Response<List<MediaIndex>> {
+    override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.watchlist.index()
+    }
+
+    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
+        return Pair(null, Service.watchlist.search(query))
     }
 
     override fun title(): String {

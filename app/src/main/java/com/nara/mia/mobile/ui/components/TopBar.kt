@@ -1,5 +1,6 @@
 package com.nara.mia.mobile.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, drawerState: DrawerState? = null, title: @Composable () -> Unit) {
+fun TopBar(navController: NavController, drawerState: DrawerState? = null, actions: @Composable (RowScope.() -> Unit) = { }, title: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
 
     TopAppBar(
@@ -42,6 +43,7 @@ fun TopBar(navController: NavController, drawerState: DrawerState? = null, title
                 }
             }
         },
-        title = title
+        title = title,
+        actions = actions
     )
 }

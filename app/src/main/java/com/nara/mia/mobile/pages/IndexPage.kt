@@ -6,13 +6,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
@@ -21,24 +31,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.infrastructure.imageUrl
+import com.nara.mia.mobile.models.ExternalIndex
+import com.nara.mia.mobile.models.IIndex
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.ui.components.TopBar
 import com.nara.mia.mobile.view_models.IndexViewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerState: DrawerState) {
     val state by viewModel.state.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
+    var searchVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = "") {
         pullRefreshState.startRefresh()
@@ -50,51 +70,133 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
 
     Scaffold(
         topBar = {
-            TopBar(navController = navController, drawerState = drawerState) {
-                Text(text = viewModel.title())
-            }
-        }
+            TopBar(
+                navController = navController,
+                drawerState = drawerState,
+                title = {
+                    Text(text = viewModel.title())
+                },
+                actions = {
+                    IconButton(onClick = { searchVisible = !searchVisible }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search"
+                        )
+                    }
+                }
+            )
+        },
+
     ) { padding ->
-        Box(
-            modifier = Modifier
+        Column(
+            Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .nestedScroll(pullRefreshState.nestedScrollConnection)
         ) {
-            FlowRow(
-                Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally)
-            ) {
-                state.index?.forEach { idx ->
-                    Poster(index = idx, navController = navController)
-                }
+            if(searchVisible) {
+                DockedSearchBar(
+                    query = state.query,
+                    onQueryChange = { v -> viewModel.applySearch(v) },
+                    onSearch = { },
+                    active = false,
+                    onActiveChange = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                ) { }
             }
-            PullToRefreshContainer(
-                state = pullRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(pullRefreshState.nestedScrollConnection)
+            ) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    FlowRow(
+                        verticalArrangement = Arrangement.spacedBy(15.dp),
+                        horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
+                        modifier = Modifier.fillMaxWidth().padding(15.dp)
+                    ) {
+                        state.index?.forEach { idx ->
+                            Poster(index = idx, Modifier.clickable { navController.navigate(if(idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") })
+                        }
+                    }
+
+                    if(!state.external.isNullOrEmpty()) {
+                        Text(
+                            text = "External",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.headlineMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp)
+                        )
+
+                        FlowRow(
+                            verticalArrangement = Arrangement.spacedBy(20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            state.external?.forEach { idx ->
+                                Poster(index = idx)
+                            }
+                        }
+                    }
+
+                }
+                PullToRefreshContainer(
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            }
         }
     }
 
 }
 
 @Composable
-fun Poster(index: MediaIndex, navController: NavController) {
+fun Poster(index: IIndex, modifier: Modifier = Modifier) {
     Column(
-        Modifier
-            .width(100.dp)
-            .clickable {
-                navController.navigate(if (index.type == MediaType.Movie) "movie/" + index.id else "series/" + index.id)
-            }
+        modifier
+            .width(110.dp)
     ) {
-        AsyncImage(
-            model = imageUrl(index.posterPath ?: ""),
-            contentDescription = index.title
-        )
+        Box {
+            AsyncImage(
+                model = imageUrl(index.posterPath ?: ""),
+                contentDescription = index.title
+            )
+
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_movie_48),
+                contentDescription = "Movie",
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(5.dp)
+                    .size(25.dp)
+            )
+
+            if(index is ExternalIndex) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(5.dp)
+                        .size(25.dp)
+                )
+            } else if(index is MediaIndex && index.stars != null) {
+                Row(
+                    Modifier.align(Alignment.TopEnd).padding(5.dp)
+                ) {
+                    Icon(painter = painterResource(id = R.drawable.baseline_star_rate_24), contentDescription = "", tint = Color.Yellow)
+                    Text(text = ((index.stars * 10.0).roundToInt() / 10.0).toString())
+                }
+            }
+        }
         Text(text = index.title, softWrap = true, textAlign = TextAlign.Center)
     }
 }
