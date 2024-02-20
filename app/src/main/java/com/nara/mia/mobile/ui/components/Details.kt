@@ -14,7 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,36 +26,67 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.nara.mia.mobile.R
+import com.nara.mia.mobile.infrastructure.IDetailsViewModel
 import com.nara.mia.mobile.infrastructure.imageUrl
 import com.nara.mia.mobile.models.IMediaDetails
 import java.util.Vector
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun Details(media: IMediaDetails?, navController: NavController, onRefresh: (() -> Unit) -> Unit, specifics: @Composable () -> Unit) {
+fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDetailsViewModel, specifics: @Composable () -> Unit) {
     val pullRefreshState = rememberPullToRefreshState()
+    var menuExposed by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = "") {
         pullRefreshState.startRefresh()
     }
 
     if(pullRefreshState.isRefreshing) {
-        onRefresh { pullRefreshState.endRefresh() }
+        viewModel.refresh { pullRefreshState.endRefresh() }
     }
-
 
     Scaffold(
         topBar = {
-            TopBar(navController = navController) {
-                Text(text = media?.title ?: "")
-            }
+            TopBar(
+                navController = navController,
+                title = { Text(text = media?.title ?: "") },
+                actions = {
+                    IconButton(onClick = { menuExposed = true }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_more_vert_24),
+                            contentDescription = ""
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExposed,
+                        onDismissRequest = { menuExposed = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = { viewModel.delete(navController) },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_delete_24),
+                                    contentDescription = ""
+                                )
+                            }
+                        )
+                    }
+                }
+            )
         }
     ) { padding ->
         Box(modifier = Modifier

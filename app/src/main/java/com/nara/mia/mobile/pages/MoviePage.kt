@@ -17,7 +17,7 @@ fun MoviePage(viewModel: MovieViewModel, navController: NavController) {
     Details(
         media = movie,
         navController = navController,
-        onRefresh = viewModel::refresh
+        viewModel = viewModel
     ) {
         movie ?: return@Details
         lateinit var releaseYear: String

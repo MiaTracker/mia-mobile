@@ -18,7 +18,7 @@ fun SeriesPage(viewModel: SeriesViewModel, navController: NavController) {
     Details(
         media = series,
         navController = navController,
-        onRefresh = viewModel::refresh
+        viewModel = viewModel
     ) {
         series ?: return@Details
 

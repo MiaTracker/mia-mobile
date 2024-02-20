@@ -5,6 +5,7 @@ import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.SeriesDetails
 import com.nara.mia.mobile.models.Source
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -29,4 +30,7 @@ interface Series {
 
     @GET("series/{id}/on_watchlist")
     suspend fun onWatchlist(@Path("id") seriesId: Int): Response<Boolean>
+
+    @DELETE("series/{id}")
+    suspend fun delete(@Path("id") seriesId: Int): Response<Unit>
 }
