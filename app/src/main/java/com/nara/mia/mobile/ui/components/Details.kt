@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -49,6 +51,7 @@ import java.util.Vector
 fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDetailsViewModel, specifics: @Composable () -> Unit) {
     val pullRefreshState = rememberPullToRefreshState()
     var menuExposed by remember { mutableStateOf(false) }
+    var deleteDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = "") {
         pullRefreshState.startRefresh()
@@ -76,7 +79,10 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                     ) {
                         DropdownMenuItem(
                             text = { Text("Delete") },
-                            onClick = { viewModel.delete(navController) },
+                            onClick = {
+                                deleteDialogOpen = true
+                                menuExposed = false
+                            },
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.baseline_delete_24),
@@ -175,6 +181,26 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
         }
     }
 
+    if(deleteDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { deleteDialogOpen = false },
+            title = { Text(text = "Warning") },
+            text = { Text(text = "Do you really want to delete '${media?.title}'?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteDialogOpen = false
+                    viewModel.delete(navController)
+                }) {
+                    Text(text = "Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteDialogOpen = false }) {
+                    Text(text = "No")
+                }
+            }
+        )
+    }
 }
 
 fun <T> buildTagString(vec: Vector<T>, f: (T) -> String): String {

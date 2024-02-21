@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -58,6 +60,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
     val state by viewModel.state.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
     var searchVisible by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(key1 = "") {
         pullRefreshState.startRefresh()
@@ -102,7 +105,12 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(0.dp, 10.dp, 0.dp, 0.dp)
+                        .focusRequester(searchFocusRequester)
                 ) { }
+            }
+
+            LaunchedEffect(key1 = searchVisible) {
+                if(searchVisible) searchFocusRequester.requestFocus()
             }
 
             Box(
@@ -118,7 +126,9 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                     FlowRow(
                         verticalArrangement = Arrangement.spacedBy(15.dp),
                         horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
-                        modifier = Modifier.fillMaxWidth().padding(15.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp)
                     ) {
                         state.index?.forEach { idx ->
                             Poster(index = idx, Modifier.clickable { navController.navigate(if(idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") })
@@ -154,7 +164,6 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
             }
         }
     }
-
 }
 
 @Composable
@@ -189,7 +198,9 @@ fun Poster(index: IIndex, modifier: Modifier = Modifier) {
                 )
             } else if(index is MediaIndex && index.stars != null) {
                 Row(
-                    Modifier.align(Alignment.TopEnd).padding(5.dp)
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(5.dp)
                 ) {
                     Icon(painter = painterResource(id = R.drawable.baseline_star_rate_24), contentDescription = "", tint = Color.Yellow)
                     Text(text = ((index.stars * 10.0).roundToInt() / 10.0).toString())
