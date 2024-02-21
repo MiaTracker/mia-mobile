@@ -38,4 +38,18 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
             navController.popBackStack()
         }
     }
+
+    override fun deleteSource(source: Int) {
+        viewModelScope.launch {
+            Service.series.deleteSource(_state.value.series?.id ?: return@launch, source)
+            refresh { }
+        }
+    }
+
+    override fun deleteLog(log: Int) {
+        viewModelScope.launch {
+            Service.series.deleteLog(_state.value.series?.id ?: return@launch, log)
+            refresh { }
+        }
+    }
 }

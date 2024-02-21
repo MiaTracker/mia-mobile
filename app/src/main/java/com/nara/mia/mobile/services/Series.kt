@@ -33,4 +33,10 @@ interface Series {
 
     @DELETE("series/{id}")
     suspend fun delete(@Path("id") seriesId: Int): Response<Unit>
+
+    @DELETE("movies/{series_id}/sources/{id}")
+    suspend fun deleteSource(@Path("series_id") seriesId: Int, @Path("id") sourceId: Int): Response<Unit>
+
+    @DELETE("movies/{series_id}/logs/{id}")
+    suspend fun deleteLog(@Path("series_id") seriesId: Int, @Path("id") logId: Int): Response<Unit>
 }

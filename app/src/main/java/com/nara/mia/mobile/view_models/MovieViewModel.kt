@@ -38,4 +38,18 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
             navController.popBackStack()
         }
     }
+
+    override fun deleteSource(source: Int) {
+        viewModelScope.launch {
+            Service.movies.deleteSource(_state.value.movie?.id ?: return@launch, source)
+            refresh { }
+        }
+    }
+
+    override fun deleteLog(log: Int) {
+        viewModelScope.launch {
+            Service.movies.deleteLog(_state.value.movie?.id ?: return@launch, log)
+            refresh { }
+        }
+    }
 }

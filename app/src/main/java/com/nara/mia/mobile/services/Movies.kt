@@ -33,4 +33,10 @@ interface Movies {
 
     @DELETE("movies/{id}")
     suspend fun delete(@Path("id") movieId: Int): Response<Unit>
+
+    @DELETE("movies/{movie_id}/sources/{id}")
+    suspend fun deleteSource(@Path("movie_id") movieId: Int, @Path("id") sourceId: Int): Response<Unit>
+
+    @DELETE("movies/{movie_id}/logs/{id}")
+    suspend fun deleteLog(@Path("movie_id") movieId: Int, @Path("id") logId: Int): Response<Unit>
 }

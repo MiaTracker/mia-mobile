@@ -6,4 +6,8 @@ interface IDetailsViewModel {
     fun refresh(callback: () -> Unit)
 
     fun delete(navController: NavController)
+
+    fun deleteSource(source: Int)
+
+    fun deleteLog(log: Int)
 }
