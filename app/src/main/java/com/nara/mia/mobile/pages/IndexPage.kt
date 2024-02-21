@@ -102,6 +102,13 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                     onSearch = { },
                     active = false,
                     onActiveChange = { },
+                    trailingIcon = {
+                        if(state.query.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.applySearch("") }) {
+                                Icon(painter = painterResource(id = R.drawable.baseline_clear_24), contentDescription = "Clear")
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(0.dp, 10.dp, 0.dp, 0.dp)
