@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Date
 
-
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-data class Log(
-    @JsonProperty("id") val id: Int,
+data class LogCreate(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonProperty("date") val date: Date,
     @JsonProperty("source") val source: String,

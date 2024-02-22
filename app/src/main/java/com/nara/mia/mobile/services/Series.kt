@@ -1,10 +1,14 @@
 package com.nara.mia.mobile.services
 
+import com.nara.mia.mobile.models.Log
+import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.SeriesDetails
 import com.nara.mia.mobile.models.Source
+import com.nara.mia.mobile.models.SourceCreate
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -34,9 +38,21 @@ interface Series {
     @DELETE("series/{id}")
     suspend fun delete(@Path("id") seriesId: Int): Response<Unit>
 
-    @DELETE("movies/{series_id}/sources/{id}")
+    @POST("series/{series_id}/sources")
+    suspend fun sourceCreate(@Path("series_id") seriesId: Int, @Body source: SourceCreate): Response<Unit>
+
+    @POST("series/{series_id}/sources/{id}")
+    suspend fun sourceUpdate(@Path("series_id") seriesId: Int, @Path("id") sourceId: Int, @Body source: Source): Response<Source>
+
+    @DELETE("series/{series_id}/sources/{id}")
     suspend fun deleteSource(@Path("series_id") seriesId: Int, @Path("id") sourceId: Int): Response<Unit>
 
-    @DELETE("movies/{series_id}/logs/{id}")
+    @POST("series/{series_id}/logs")
+    suspend fun logCreate(@Path("series_id") seriesId: Int, @Body log: LogCreate): Response<Unit>
+
+    @POST("series/{series_id}/logs/{id}")
+    suspend fun logUpdate(@Path("series_id") seriesId: Int, @Path("id") logId: Int, @Body log: Log): Response<Unit>
+
+    @DELETE("series/{series_id}/logs/{id}")
     suspend fun deleteLog(@Path("series_id") seriesId: Int, @Path("id") logId: Int): Response<Unit>
 }

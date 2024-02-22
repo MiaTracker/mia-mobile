@@ -1,10 +1,14 @@
 package com.nara.mia.mobile.services
 
+import com.nara.mia.mobile.models.Log
+import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.MovieDetails
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
+import com.nara.mia.mobile.models.SourceCreate
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -34,8 +38,20 @@ interface Movies {
     @DELETE("movies/{id}")
     suspend fun delete(@Path("id") movieId: Int): Response<Unit>
 
+    @POST("movies/{movie_id}/sources")
+    suspend fun sourceCreate(@Path("movie_id") movieId: Int, @Body source: SourceCreate): Response<Unit>
+
+    @POST("movies/{movie_id}/sources/{id}")
+    suspend fun sourceUpdate(@Path("movie_id") movieId: Int, @Path("id") sourceId: Int, @Body source: Source): Response<Source>
+
     @DELETE("movies/{movie_id}/sources/{id}")
     suspend fun deleteSource(@Path("movie_id") movieId: Int, @Path("id") sourceId: Int): Response<Unit>
+
+    @POST("movies/{movie_id}/logs")
+    suspend fun logCreate(@Path("movie_id") movieId: Int, @Body log: LogCreate): Response<Unit>
+
+    @POST("movies/{movie_id}/logs/{id}")
+    suspend fun logUpdate(@Path("movie_id") movieId: Int, @Path("id") logId: Int, @Body log: Log): Response<Unit>
 
     @DELETE("movies/{movie_id}/logs/{id}")
     suspend fun deleteLog(@Path("movie_id") movieId: Int, @Path("id") logId: Int): Response<Unit>
