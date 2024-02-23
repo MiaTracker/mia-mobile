@@ -138,7 +138,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                             .padding(15.dp)
                     ) {
                         state.index?.forEach { idx ->
-                            Poster(index = idx, Modifier.clickable { navController.navigate(if(idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") })
+                            Poster(idx, viewModel.multiType, Modifier.clickable { navController.navigate(if(idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") })
                         }
                     }
 
@@ -158,7 +158,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             state.external?.forEach { idx ->
-                                Poster(index = idx, Modifier.clickable { viewModel.create(idx, navController) })
+                                Poster(idx, viewModel.multiType, Modifier.clickable { viewModel.create(idx, navController) })
                             }
                         }
                     }
@@ -174,7 +174,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
 }
 
 @Composable
-fun Poster(index: IIndex, modifier: Modifier = Modifier) {
+fun Poster(index: IIndex, showType: Boolean, modifier: Modifier = Modifier) {
     Column(
         modifier
             .width(110.dp)
@@ -185,14 +185,27 @@ fun Poster(index: IIndex, modifier: Modifier = Modifier) {
                 contentDescription = index.title
             )
 
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_movie_48),
-                contentDescription = "Movie",
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(5.dp)
-                    .size(25.dp)
-            )
+            if(showType) {
+                if(index.type == MediaType.Movie) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_movie_48),
+                        contentDescription = "Movie",
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(5.dp)
+                            .size(25.dp)
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_tv_48),
+                        contentDescription = "Series",
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(5.dp)
+                            .size(25.dp)
+                    )
+                }
+            }
 
             if(index is ExternalIndex) {
                 Icon(

@@ -25,6 +25,8 @@ abstract class IndexViewModel : ViewModel() {
     private val _state = MutableStateFlow(IndexState())
     val state: StateFlow<IndexState> = _state.asStateFlow()
 
+    abstract val multiType: Boolean
+
     fun refresh(callback: (() -> Unit)? = null) {
         if(state.value.query.isEmpty()) index(callback)
         else search(callback)
@@ -97,6 +99,8 @@ abstract class IndexViewModel : ViewModel() {
 }
 
 class MediaIndexViewModel : IndexViewModel() {
+    override val multiType: Boolean = true
+
     override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.media.index()
     }
@@ -111,6 +115,8 @@ class MediaIndexViewModel : IndexViewModel() {
 }
 
 class MoviesIndexViewModel : IndexViewModel() {
+    override val multiType: Boolean = false
+
     override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.movies.index()
     }
@@ -125,6 +131,8 @@ class MoviesIndexViewModel : IndexViewModel() {
 }
 
 class SeriesIndexViewModel : IndexViewModel() {
+    override val multiType: Boolean = false
+
     override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.series.index()
     }
@@ -139,6 +147,8 @@ class SeriesIndexViewModel : IndexViewModel() {
 }
 
 class WatchlistViewModel : IndexViewModel() {
+    override val multiType: Boolean = true
+
     override suspend fun apiIndex(): Response<List<MediaIndex>> {
         return Service.watchlist.index()
     }
