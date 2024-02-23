@@ -20,4 +20,15 @@ interface IDetailsViewModel {
     fun isLogValid(log: Log): Boolean
 
     fun saveLog(log: Log, callback: () -> Unit)
+
+    fun createTitle(title: String)
+    fun setPrimaryTitle(id: Int)
+    fun deleteTitle(id: Int)
+    fun createGenre(genre: String)
+    fun deleteGenre(id: Int)
+    fun createTag(tag: String)
+    fun deleteTag(id: Int)
+
+    fun addToWatchlist()
+    fun removeFromWatchlist()
 }

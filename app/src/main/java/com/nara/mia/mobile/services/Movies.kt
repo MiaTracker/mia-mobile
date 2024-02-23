@@ -1,5 +1,6 @@
 package com.nara.mia.mobile.services
 
+import com.nara.mia.mobile.models.GenreCreate
 import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.MediaIndex
@@ -7,6 +8,8 @@ import com.nara.mia.mobile.models.MovieDetails
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.SourceCreate
+import com.nara.mia.mobile.models.TagCreate
+import com.nara.mia.mobile.models.TitleCreate
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -37,6 +40,27 @@ interface Movies {
 
     @DELETE("movies/{id}")
     suspend fun delete(@Path("id") movieId: Int): Response<Unit>
+
+    @POST("movies/{movie_id}/titles")
+    suspend fun titleCreate(@Path("movie_id") movieId: Int, @Body title: TitleCreate): Response<Unit>
+
+    @POST("movies/{movie_id}/titles/{id}/primary")
+    suspend fun titleSetPrimary(@Path("movie_id") movieId: Int, @Path("id") titleId: Int): Response<Unit>
+
+    @DELETE("movies/{movie_id}/titles/{id}")
+    suspend fun titleDelete(@Path("movie_id") movieId: Int, @Path("id") titleId: Int): Response<Unit>
+
+    @POST("movies/{movie_id}/genres")
+    suspend fun genreCreate(@Path("movie_id") movieId: Int, @Body genre: GenreCreate): Response<Unit>
+
+    @DELETE("movies/{movie_id}/genres/{id}")
+    suspend fun genreDelete(@Path("movie_id") movieId: Int, @Path("id") genreId: Int): Response<Unit>
+
+    @POST("movies/{movie_id}/tags")
+    suspend fun tagCreate(@Path("movie_id") movieId: Int, @Body tag: TagCreate): Response<Unit>
+
+    @DELETE("movies/{movie_id}/tags/{id}")
+    suspend fun tagDelete(@Path("movie_id") movieId: Int, @Path("id") tagId: Int): Response<Unit>
 
     @POST("movies/{movie_id}/sources")
     suspend fun sourceCreate(@Path("movie_id") movieId: Int, @Body source: SourceCreate): Response<Unit>

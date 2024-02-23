@@ -4,11 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.nara.mia.mobile.infrastructure.IDetailsViewModel
+import com.nara.mia.mobile.models.GenreCreate
 import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.SeriesDetails
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.SourceCreate
+import com.nara.mia.mobile.models.TagCreate
+import com.nara.mia.mobile.models.TitleCreate
+import com.nara.mia.mobile.models.WatchlistParams
 import com.nara.mia.mobile.services.Service
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -93,6 +97,72 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
             else
                 Service.series.logUpdate(state.value.series?.id ?: return@launch, log.id, log)
             refresh(callback)
+        }
+    }
+
+    override fun createTitle(title: String) {
+        viewModelScope.launch {
+            if(title.isEmpty()) return@launch
+            Service.series.titleCreate(state.value.series?.id ?: return@launch, TitleCreate(title))
+            refresh { }
+        }
+    }
+
+    override fun setPrimaryTitle(id: Int) {
+        viewModelScope.launch {
+            Service.series.titleSetPrimary(state.value.series?.id ?: return@launch, id)
+            refresh { }
+        }
+    }
+
+    override fun deleteTitle(id: Int) {
+        viewModelScope.launch {
+            Service.series.titleDelete(state.value.series?.id ?: return@launch, id)
+            refresh { }
+        }
+    }
+
+    override fun createGenre(genre: String) {
+        viewModelScope.launch {
+            if(genre.isEmpty()) return@launch
+            Service.series.genreCreate(state.value.series?.id ?: return@launch, GenreCreate(genre))
+            refresh { }
+        }
+    }
+
+    override fun deleteGenre(id: Int) {
+        viewModelScope.launch {
+            Service.series.genreDelete(state.value.series?.id ?: return@launch, id)
+            refresh { }
+        }
+    }
+
+    override fun createTag(tag: String) {
+        viewModelScope.launch {
+            if(tag.isEmpty()) return@launch
+            Service.series.tagCreate(state.value.series?.id ?: return@launch, TagCreate(tag))
+            refresh { }
+        }
+    }
+
+    override fun deleteTag(id: Int) {
+        viewModelScope.launch {
+            Service.series.tagDelete(state.value.series?.id ?: return@launch, id)
+            refresh { }
+        }
+    }
+
+    override fun addToWatchlist() {
+        viewModelScope.launch {
+            Service.watchlist.add(WatchlistParams(state.value.series?.id ?: return@launch))
+            refresh {  }
+        }
+    }
+
+    override fun removeFromWatchlist() {
+        viewModelScope.launch {
+            Service.watchlist.remove(WatchlistParams(state.value.series?.id ?: return@launch))
+            refresh {  }
         }
     }
 }
