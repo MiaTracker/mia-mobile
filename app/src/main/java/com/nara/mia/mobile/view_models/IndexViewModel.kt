@@ -69,23 +69,12 @@ abstract class IndexViewModel : ViewModel() {
     private fun search(callback: (() -> Unit)?) {
         viewModelScope.launch {
             val res = apiSearch(state.value.query)
-            res.first?.let {
-                it.body()?.let { data ->
-                    _state.update { state ->
-                        state.copy(
-                            index = data.indexes,
-                            external = data.external
-                        )
-                    }
-                }
-            }
-            res.second?.let {
-                it.body()?.let { data ->
-                    _state.update { state ->
-                        state.copy(
-                            index = data
-                        )
-                    }
+            res.body()?.let { data ->
+                _state.update { state ->
+                    state.copy(
+                        index = data.indexes,
+                        external = data.external
+                    )
                 }
             }
 
@@ -94,7 +83,7 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     abstract suspend fun apiIndex(): Response<List<MediaIndex>>
-    abstract suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?>
+    abstract suspend fun apiSearch(query: String): Response<SearchResults>
     abstract fun title(): String
 }
 
@@ -105,8 +94,8 @@ class MediaIndexViewModel : IndexViewModel() {
         return Service.media.index()
     }
 
-    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
-        return Pair(Service.media.search(query), null)
+    override suspend fun apiSearch(query: String): Response<SearchResults> {
+        return Service.media.search(query)
     }
 
     override fun title(): String {
@@ -121,8 +110,8 @@ class MoviesIndexViewModel : IndexViewModel() {
         return Service.movies.index()
     }
 
-    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
-        return Pair(Service.movies.search(query), null)
+    override suspend fun apiSearch(query: String): Response<SearchResults> {
+        return Service.movies.search(query)
     }
 
     override fun title(): String {
@@ -137,8 +126,8 @@ class SeriesIndexViewModel : IndexViewModel() {
         return Service.series.index()
     }
 
-    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
-        return Pair(Service.series.search(query), null)
+    override suspend fun apiSearch(query: String): Response<SearchResults> {
+        return Service.series.search(query)
     }
 
     override fun title(): String {
@@ -153,8 +142,8 @@ class WatchlistViewModel : IndexViewModel() {
         return Service.watchlist.index()
     }
 
-    override suspend fun apiSearch(query: String): Pair<Response<SearchResults>?, Response<List<MediaIndex>>?> {
-        return Pair(null, Service.watchlist.search(query))
+    override suspend fun apiSearch(query: String): Response<SearchResults> {
+        return Service.watchlist.search(query)
     }
 
     override fun title(): String {

@@ -7,5 +7,6 @@ import java.util.Vector
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 data class SearchResults(
     @JsonProperty("indexes") val indexes: Vector<MediaIndex>,
-    @JsonProperty("external") val external: Vector<ExternalIndex>
+    @JsonProperty("external") val external: Vector<ExternalIndex>,
+    @JsonProperty("query_valid") val queryValid: Boolean
 )
