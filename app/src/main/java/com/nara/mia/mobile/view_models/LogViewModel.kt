@@ -8,6 +8,7 @@ import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.IIndex
 import com.nara.mia.mobile.models.Logset
 import com.nara.mia.mobile.models.MediaIndex
+import com.nara.mia.mobile.models.SearchQuery
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.SourceCreate
@@ -55,7 +56,7 @@ class LogViewModel : ViewModel() {
             state.copy(mediaQuery = query)
         }
         viewModelScope.launch {
-            val res = Service.media.search(query)
+            val res = Service.media.search(false, SearchQuery(query, null, false, null))
             if(!res.isSuccessful) return@launch //TODO: handle
             _state.update { state ->
                 state.copy(

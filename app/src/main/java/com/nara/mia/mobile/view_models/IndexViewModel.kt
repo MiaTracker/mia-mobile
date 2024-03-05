@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.MediaIndex
+import com.nara.mia.mobile.models.SearchQuery
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.services.Service
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,7 +96,7 @@ class MediaIndexViewModel : IndexViewModel() {
     }
 
     override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.media.search(query)
+        return Service.media.search(false, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -111,7 +112,7 @@ class MoviesIndexViewModel : IndexViewModel() {
     }
 
     override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.movies.search(query)
+        return Service.movies.search(false, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -127,7 +128,7 @@ class SeriesIndexViewModel : IndexViewModel() {
     }
 
     override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.series.search(query)
+        return Service.series.search(false, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -143,7 +144,7 @@ class WatchlistViewModel : IndexViewModel() {
     }
 
     override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.watchlist.search(query)
+        return Service.watchlist.search(SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {

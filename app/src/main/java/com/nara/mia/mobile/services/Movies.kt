@@ -5,6 +5,7 @@ import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.MovieDetails
+import com.nara.mia.mobile.models.SearchQuery
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.SourceCreate
@@ -23,8 +24,8 @@ interface Movies {
     @GET("movies")
     suspend fun index(): Response<List<MediaIndex>>
 
-    @GET("movies/search")
-    suspend fun search(@Query("query") query: String): Response<SearchResults>
+    @POST("movies/search")
+    suspend fun search(@Query("committed") committed: Boolean, @Body query: SearchQuery): Response<SearchResults>
 
     @POST("movies")
     suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Int>

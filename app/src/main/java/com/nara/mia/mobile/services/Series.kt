@@ -4,6 +4,7 @@ import com.nara.mia.mobile.models.GenreCreate
 import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.LogCreate
 import com.nara.mia.mobile.models.MediaIndex
+import com.nara.mia.mobile.models.SearchQuery
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.SeriesDetails
 import com.nara.mia.mobile.models.Source
@@ -23,8 +24,8 @@ interface Series {
     @GET("series")
     suspend fun index(): Response<List<MediaIndex>>
 
-    @GET("series/search")
-    suspend fun search(@Query("query") query: String): Response<SearchResults>
+    @POST("series/search")
+    suspend fun search(@Query("committed") committed: Boolean, @Body query: SearchQuery): Response<SearchResults>
 
     @POST("series")
     suspend fun create(@Query("tmdb_id") tmdbId: Int): Response<Int>
