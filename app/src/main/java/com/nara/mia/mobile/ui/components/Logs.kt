@@ -183,6 +183,7 @@ fun LogDialog(log: Log, sources: List<Source>, viewModel: IDetailsViewModel, upd
                                 text = { Text(text = s.name) },
                                 onClick = {
                                     source = s
+                                    updateLog(log.copy(source = s.name))
                                     sourceExpanded = false
                                 },
                                 Modifier.fillMaxWidth()
