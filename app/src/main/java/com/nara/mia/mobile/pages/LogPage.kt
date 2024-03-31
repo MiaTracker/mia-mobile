@@ -1,6 +1,7 @@
 package com.nara.mia.mobile.pages
 
 import android.os.Build
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,8 +59,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil.compose.AsyncImage
-import com.nara.mia.mobile.infrastructure.imageUrl
+import com.nara.mia.mobile.infrastructure.tmdbImagePainter
 import com.nara.mia.mobile.view_models.LogViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nara.mia.mobile.R
@@ -445,13 +445,11 @@ fun IndexListItem(idx: IIndex, external: Boolean, modifier: Modifier = Modifier,
     ListItem(
         headlineContent = { Text(text = idx.title) },
         leadingContent = {
-            if(idx.posterPath != null) {
-                AsyncImage(
-                    model = imageUrl(idx.posterPath!!),
-                    contentDescription = "Poster",
-                    Modifier.height(90.dp)
-                )
-            }
+            Image(
+                painter = tmdbImagePainter(idx.posterPath),
+                contentDescription = "Poster",
+                Modifier.width(60.dp).height(90.dp)
+            )
         },
         trailingContent = {
             Row {

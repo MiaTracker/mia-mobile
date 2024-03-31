@@ -1,5 +1,6 @@
 package com.nara.mia.mobile.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -46,16 +48,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.SourceType
 import com.nara.mia.mobile.enums.TagType
 import com.nara.mia.mobile.infrastructure.IDetailsViewModel
-import com.nara.mia.mobile.infrastructure.imageUrl
+import com.nara.mia.mobile.infrastructure.tmdbImagePainter
 import com.nara.mia.mobile.models.AlternativeTitle
 import com.nara.mia.mobile.models.Genre
 import com.nara.mia.mobile.models.IMediaDetails
@@ -189,19 +191,24 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    AsyncImage(
-                        model = media.backdropPath?.let { imageUrl(it) },
-                        contentDescription = "Backdrop image",
-                        Modifier.fillMaxWidth()
-                    )
+                    if(!media.backdropPath.isNullOrEmpty()) {
+                        Image(
+                            painter = tmdbImagePainter(media.backdropPath),
+                            contentDescription = "Backdrop image",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.fillMaxWidth()
+                                .height(200.dp)
+                        )
+                    }
                     Box(
                         Modifier.fillMaxWidth()
                     ) {
-                        AsyncImage(
-                            model = media.posterPath?.let { imageUrl(it) },
+                        Image(
+                            painter = tmdbImagePainter(media.posterPath),
                             contentDescription = "Backdrop image",
                             Modifier
                                 .width(150.dp)
+                                .height(225.dp)
                                 .absoluteOffset(10.dp, (-10).dp)
                                 .zIndex(1.1f)
                         )

@@ -1,5 +1,6 @@
 package com.nara.mia.mobile.pages
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,10 +45,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.MediaType
-import com.nara.mia.mobile.infrastructure.imageUrl
+import com.nara.mia.mobile.infrastructure.tmdbImagePainter
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.IIndex
 import com.nara.mia.mobile.models.MediaIndex
@@ -180,9 +181,11 @@ fun Poster(index: IIndex, showType: Boolean, modifier: Modifier = Modifier) {
             .width(110.dp)
     ) {
         Box {
-            AsyncImage(
-                model = imageUrl(index.posterPath ?: ""),
-                contentDescription = index.title
+            Image(
+                painter = tmdbImagePainter(index.posterPath),
+                contentDescription = index.title,
+                modifier = Modifier.fillMaxWidth()
+                    .height(165.dp)
             )
 
             if(showType) {
