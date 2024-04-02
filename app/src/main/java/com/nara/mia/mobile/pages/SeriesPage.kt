@@ -34,7 +34,7 @@ fun SeriesPage(viewModel: SeriesViewModel, navController: NavController) {
         Text(text = firstAirDate)
         if(series.numberOfSeasons != null) {
             val numberOfSeasons: String = series.numberOfSeasons.toString()
-            Text(text = "$numberOfSeasons min")
+            Text(text = "$numberOfSeasons seasons")
         }
         if(series.numberOfEpisodes != null) {
             val numberOfEpisodes: String = series.numberOfEpisodes.toString()

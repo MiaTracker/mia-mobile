@@ -31,8 +31,9 @@ fun MoviePage(viewModel: MovieViewModel, navController: NavController) {
         Text(text = movie.status ?: "")
         Text(text = releaseYear)
         if(movie.runtime != null) {
-            val runtime: String = movie.runtime.toString()
-            Text(text = "$runtime min")
+            val hours = movie.runtime / 60
+            val min = movie.runtime % 60
+            Text(text = "${hours}h ${min}min")
         }
     }
 }
