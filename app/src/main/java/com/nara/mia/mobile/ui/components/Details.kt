@@ -66,6 +66,7 @@ import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.Tag
 import java.util.Date
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -197,7 +198,8 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                             painter = tmdbImagePainter(media.backdropPath, 700.dp, TmdbImageType.Backdrop),
                             contentDescription = "Backdrop image",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
                                 .height(200.dp)
                         )
                     }
@@ -246,6 +248,37 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                                         .absolutePadding(160.dp)
                                         .padding(horizontal = 10.dp, vertical = 5.dp),
                                 ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    ) {
+                                        if(media.stars != null) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                modifier = Modifier
+                                                    .padding(5.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.baseline_star_rate_24),
+                                                    contentDescription = "",
+                                                )
+                                                Text(text = ((media.stars!! * 100.0).roundToInt() / 100.0).toString())
+                                            }
+                                        }
+                                        if(media.tmdbVoteAverage != null) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                modifier = Modifier
+                                                    .padding(5.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.baseline_stars_24),
+                                                    contentDescription = "",
+                                                )
+                                                Text(text = ((media.tmdbVoteAverage!! * 100.0).roundToInt() / 100.0).toString())
+                                            }
+                                        }
+                                    }
+
                                     FlowRow(
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
@@ -282,7 +315,9 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                     }
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.padding(10.dp, 0.dp).absoluteOffset(0.dp, (-5).dp)
+                        modifier = Modifier
+                            .padding(10.dp, 0.dp)
+                            .absoluteOffset(0.dp, (-5).dp)
                     ) {
                         SuggestionChip(
                             onClick = { currentlyCreatedTagType.value = TagType.Title },
