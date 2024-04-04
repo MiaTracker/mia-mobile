@@ -6,6 +6,7 @@ import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.infrastructure.StatusCode
 import com.nara.mia.mobile.models.UserLogin
 import com.nara.mia.mobile.services.Service
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,7 +53,7 @@ class LoginViewModel(private val loginCallback: () -> Unit, private val instance
 
     fun login() {
         if(_state.value.username.isEmpty() || _state.value.password.isEmpty()) return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val user = UserLogin(_state.value.username, _state.value.password)
             val res = Service.users.login(user)
             if(res.isSuccessful) {

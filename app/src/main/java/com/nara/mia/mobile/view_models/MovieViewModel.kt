@@ -14,6 +14,7 @@ import com.nara.mia.mobile.models.TagCreate
 import com.nara.mia.mobile.models.TitleCreate
 import com.nara.mia.mobile.models.WatchlistParams
 import com.nara.mia.mobile.services.Service
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +30,7 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     val state: StateFlow<MovieState> = _state.asStateFlow()
 
     override fun refresh(callback: () -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val res = Service.movies.details(id)
             _state.update { state ->
                 state.copy(
@@ -41,21 +42,21 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun delete(navController: NavController) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.delete(_state.value.movie?.id ?: return@launch)
             navController.popBackStack()
         }
     }
 
     override fun deleteSource(source: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.deleteSource(_state.value.movie?.id ?: return@launch, source)
             refresh { }
         }
     }
 
     override fun deleteLog(log: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.deleteLog(_state.value.movie?.id ?: return@launch, log)
             refresh { }
         }
@@ -66,7 +67,7 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun saveSource(source: Source, callback: () -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(!isSourceValid(source)) return@launch
             if(source.id < 0)
                 Service.movies.sourceCreate(state.value.movie?.id ?: return@launch, SourceCreate(
@@ -85,7 +86,7 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun saveLog(log: Log, callback: () -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(!isLogValid(log)) return@launch
             if(log.id < 0)
                 Service.movies.logCreate(state.value.movie?.id ?: return@launch, LogCreate(
@@ -102,7 +103,7 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun createTitle(title: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(title.isEmpty()) return@launch
             Service.movies.titleCreate(state.value.movie?.id ?: return@launch, TitleCreate(title))
             refresh { }
@@ -110,21 +111,21 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun setPrimaryTitle(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.titleSetPrimary(state.value.movie?.id ?: return@launch, id)
             refresh { }
         }
     }
 
     override fun deleteTitle(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.titleDelete(state.value.movie?.id ?: return@launch, id)
             refresh { }
         }
     }
 
     override fun createGenre(genre: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(genre.isEmpty()) return@launch
             Service.movies.genreCreate(state.value.movie?.id ?: return@launch, GenreCreate(genre))
             refresh { }
@@ -132,14 +133,14 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun deleteGenre(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.genreDelete(state.value.movie?.id ?: return@launch, id)
             refresh { }
         }
     }
 
     override fun createTag(tag: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(tag.isEmpty()) return@launch
             Service.movies.tagCreate(state.value.movie?.id ?: return@launch, TagCreate(tag))
             refresh { }
@@ -147,21 +148,21 @@ class MovieViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     }
 
     override fun deleteTag(id: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.movies.tagDelete(state.value.movie?.id ?: return@launch, id)
             refresh { }
         }
     }
 
     override fun addToWatchlist() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.watchlist.add(WatchlistParams(state.value.movie?.id ?: return@launch))
             refresh {  }
         }
     }
 
     override fun removeFromWatchlist() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             Service.watchlist.remove(WatchlistParams(state.value.movie?.id ?: return@launch))
             refresh {  }
         }

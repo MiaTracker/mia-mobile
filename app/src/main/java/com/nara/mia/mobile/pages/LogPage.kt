@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,6 +66,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.enums.SourceType
+import com.nara.mia.mobile.infrastructure.TmdbImageType
 import com.nara.mia.mobile.models.IIndex
 import java.time.Clock
 import java.time.Instant
@@ -446,9 +448,10 @@ fun IndexListItem(idx: IIndex, external: Boolean, modifier: Modifier = Modifier,
         headlineContent = { Text(text = idx.title) },
         leadingContent = {
             Image(
-                painter = tmdbImagePainter(idx.posterPath),
+                painter = tmdbImagePainter(idx.posterPath, 60.dp, TmdbImageType.Poster),
                 contentDescription = "Poster",
-                Modifier.width(60.dp).height(90.dp)
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.width(60.dp).height(90.dp)
             )
         },
         trailingContent = {

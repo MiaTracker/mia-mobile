@@ -57,6 +57,7 @@ import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.SourceType
 import com.nara.mia.mobile.enums.TagType
 import com.nara.mia.mobile.infrastructure.IDetailsViewModel
+import com.nara.mia.mobile.infrastructure.TmdbImageType
 import com.nara.mia.mobile.infrastructure.tmdbImagePainter
 import com.nara.mia.mobile.models.AlternativeTitle
 import com.nara.mia.mobile.models.Genre
@@ -193,9 +194,9 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                 ) {
                     if(!media.backdropPath.isNullOrEmpty()) {
                         Image(
-                            painter = tmdbImagePainter(media.backdropPath),
+                            painter = tmdbImagePainter(media.backdropPath, 700.dp, TmdbImageType.Backdrop),
                             contentDescription = "Backdrop image",
-                            contentScale = ContentScale.FillBounds,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxWidth()
                                 .height(200.dp)
                         )
@@ -204,9 +205,10 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                         Modifier.fillMaxWidth()
                     ) {
                         Image(
-                            painter = tmdbImagePainter(media.posterPath),
-                            contentDescription = "Backdrop image",
-                            Modifier
+                            painter = tmdbImagePainter(media.posterPath, 150.dp, TmdbImageType.Poster),
+                            contentDescription = "Poster",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
                                 .width(150.dp)
                                 .height(225.dp)
                                 .absoluteOffset(10.dp, (-10).dp)

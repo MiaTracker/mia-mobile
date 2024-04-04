@@ -64,6 +64,7 @@ import com.nara.mia.mobile.view_models.MoviesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesIndexViewModel
 import com.nara.mia.mobile.view_models.SeriesViewModel
 import com.nara.mia.mobile.view_models.WatchlistViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -310,7 +311,7 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                         },
                         selected = false,
                         onClick = {
-                            coroutineScope.launch {
+                            coroutineScope.launch(Dispatchers.IO) {
                                 Config.run?.clearToken()
                             }
                         },

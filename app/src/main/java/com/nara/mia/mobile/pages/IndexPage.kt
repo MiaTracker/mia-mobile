@@ -5,8 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DockedSearchBar
@@ -41,12 +42,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.nara.mia.mobile.R
 import com.nara.mia.mobile.enums.MediaType
+import com.nara.mia.mobile.infrastructure.TmdbImageType
 import com.nara.mia.mobile.infrastructure.tmdbImagePainter
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.IIndex
@@ -55,7 +59,7 @@ import com.nara.mia.mobile.ui.components.TopBar
 import com.nara.mia.mobile.view_models.IndexViewModel
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerState: DrawerState) {
     val state by viewModel.state.collectAsState()
@@ -126,45 +130,55 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                     .fillMaxSize()
                     .nestedScroll(pullRefreshState.nestedScrollConnection)
             ) {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 110.dp),
+                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
+                    contentPadding = PaddingValues(15.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    FlowRow(
-                        verticalArrangement = Arrangement.spacedBy(15.dp),
-                        horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(15.dp)
-                    ) {
-                        state.index?.forEach { idx ->
-                            Poster(idx, viewModel.multiType, Modifier.clickable { navController.navigate(if(idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") })
+                    val idxs = state.index
+                    if(idxs != null) {
+                        items(idxs) { idx ->
+                            Poster(
+                                idx,
+                                viewModel.multiType,
+                                Modifier.clickable { navController.navigate(if (idx.type == MediaType.Movie) "movie/${idx.id}" else "series/${idx.id}") }
+                            )
                         }
                     }
 
-                    if(!state.external.isNullOrEmpty()) {
-                        Text(
-                            text = "External",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp)
-                        )
-
-                        FlowRow(
-                            verticalArrangement = Arrangement.spacedBy(20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
-                            modifier = Modifier.fillMaxWidth()
+                    val externalIdxs = state.external
+                    if(externalIdxs != null) {
+                        item(
+                            span = { GridItemSpan(3) }
                         ) {
-                            state.external?.forEach { idx ->
-                                Poster(idx, viewModel.multiType, Modifier.clickable { viewModel.create(idx, navController) })
-                            }
+                            Text(
+                                text = "External",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.headlineMedium,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp)
+                            )
+                        }
+
+                        items(externalIdxs) { idx ->
+                            Poster(
+                                idx,
+                                viewModel.multiType,
+                                Modifier.clickable {
+                                    viewModel.create(
+                                        idx,
+                                        navController
+                                    )
+                                }
+                            )
                         }
                     }
-
                 }
+
                 PullToRefreshContainer(
                     state = pullRefreshState,
                     modifier = Modifier.align(Alignment.TopCenter)
@@ -182,9 +196,11 @@ fun Poster(index: IIndex, showType: Boolean, modifier: Modifier = Modifier) {
     ) {
         Box {
             Image(
-                painter = tmdbImagePainter(index.posterPath),
+                painter = tmdbImagePainter(index.posterPath, 110.dp, TmdbImageType.Poster),
                 contentDescription = index.title,
-                modifier = Modifier.fillMaxWidth()
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(165.dp)
             )
 
@@ -230,6 +246,6 @@ fun Poster(index: IIndex, showType: Boolean, modifier: Modifier = Modifier) {
                 }
             }
         }
-        Text(text = index.title, softWrap = true, textAlign = TextAlign.Center)
+        Text(text = index.title, softWrap = false, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
     }
 }

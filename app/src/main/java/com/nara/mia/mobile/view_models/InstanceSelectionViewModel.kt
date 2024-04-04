@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.services.Http
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,7 +45,7 @@ class InstanceSelectionViewModel(private val connectionCallback: () -> Unit) : V
 
     fun connect() {
         if (!_state.value.isUrlValid) return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
 
             val success = Http.testConnection(_state.value.url)
             if(!success) {
@@ -66,7 +67,7 @@ class InstanceSelectionViewModel(private val connectionCallback: () -> Unit) : V
                 connectionState = ConnectionState.Connecting
             )
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val success = Http.testConnection(_state.value.url)
             _state.update { state ->
                 state.copy(

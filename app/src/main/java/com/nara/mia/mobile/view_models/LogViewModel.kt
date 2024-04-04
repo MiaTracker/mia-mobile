@@ -13,6 +13,7 @@ import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.models.Source
 import com.nara.mia.mobile.models.SourceCreate
 import com.nara.mia.mobile.services.Service
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,7 +56,7 @@ class LogViewModel : ViewModel() {
         _state.update { state ->
             state.copy(mediaQuery = query)
         }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val res = Service.media.search(false, SearchQuery(query, null, false, null))
             if(!res.isSuccessful) return@launch //TODO: handle
             _state.update { state ->
@@ -86,7 +87,7 @@ class LogViewModel : ViewModel() {
     }
 
     fun refreshSources() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val idx = state.value.index
             if(idx !is MediaIndex) return@launch
             val res = if(state.value.index!!.type == MediaType.Movie) Service.movies.sources(idx.id)
@@ -107,7 +108,7 @@ class LogViewModel : ViewModel() {
     }
 
     fun refreshOnWatchlist() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val idx = state.value.index
             if(idx !is MediaIndex) return@launch
             val res = if(state.value.index!!.type == MediaType.Movie) Service.movies.onWatchlist(idx.id)
@@ -207,7 +208,7 @@ class LogViewModel : ViewModel() {
     }
 
     fun save() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(!filled()) return@launch
             val model = Logset(
                 mediaId = if(state.value.index is MediaIndex) { (state.value.index as MediaIndex).id } else { null },

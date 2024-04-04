@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.nara.mia.mobile.models.ImagesConfiguration
 import com.nara.mia.mobile.models.UserToken
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -16,8 +17,11 @@ object Config {
     val configChanged = Signal()
 
     var run: RunConfig? = null
+    var images: ImagesConfiguration? = null
+    val const: ConstConfig = ConstConfig()
 
     suspend fun init(dataStore: DataStore<Preferences>, callback: () -> Unit) {
+
         if(run != null) callback()
         run = RunConfig.load(dataStore)
         configChanged += callback
@@ -89,4 +93,8 @@ class RunConfig private constructor(private val dataStore: DataStore<Preferences
             return conf
         }
     }
+}
+
+class ConstConfig {
+    val loggingTag = "Mia"
 }

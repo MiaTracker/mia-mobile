@@ -9,6 +9,7 @@ import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.SearchQuery
 import com.nara.mia.mobile.models.SearchResults
 import com.nara.mia.mobile.services.Service
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,7 +44,7 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     fun create(idx: ExternalIndex, navController: NavController) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(idx.type == MediaType.Movie) {
                 val res = Service.movies.create(idx.externalId) //TODO: handle
                 res.body()?.let { id -> navController.navigate("movie/${id}") }
@@ -56,7 +57,7 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     private fun index(callback: (() -> Unit)?) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val res = apiIndex()
             _state.update { state ->
                 state.copy(
@@ -68,7 +69,7 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     private fun search(callback: (() -> Unit)?) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val res = apiSearch(state.value.query)
             res.body()?.let { data ->
                 _state.update { state ->
