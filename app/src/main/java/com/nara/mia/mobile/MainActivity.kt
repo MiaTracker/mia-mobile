@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
@@ -34,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -47,6 +51,7 @@ import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.infrastructure.PrefDataStore
 import com.nara.mia.mobile.infrastructure.isInstanceUrlInitialized
 import com.nara.mia.mobile.infrastructure.isTokenPresent
+import com.nara.mia.mobile.pages.AboutPage
 import com.nara.mia.mobile.pages.IndexPage
 import com.nara.mia.mobile.pages.InstanceSelectionPage
 import com.nara.mia.mobile.pages.LogPage
@@ -224,6 +229,14 @@ fun Navigation() {
         composable("log") {
             LogPage { navController.popBackStack() }
         }
+        composable("about") {
+            BasePage(navController = navController) { drawerState ->
+                AboutPage(
+                    navController,
+                    drawerState
+                )
+            }
+        }
     }
 }
 
@@ -258,6 +271,8 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                         Text(
                             text = "Mia",
                             style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily(Font(R.font.aatmospheric)),
+                            modifier = Modifier.absoluteOffset(y = 4.dp)
                         )
                     }
                     HorizontalDivider()
@@ -300,6 +315,19 @@ fun BasePage(navController: NavController, page: @Composable (DrawerState) -> Un
                         shape = RoundedCornerShape(topEndPercent = 100, bottomEndPercent = 100)
                     )
                     HorizontalDivider()
+                    NavigationDrawerItem(
+                        label = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(imageVector = Icons.Default.Info, contentDescription = null)
+                                Text(text = "About")
+                            }
+                        },
+                        selected = (currentRoute == "about"),
+                        onClick = { navController.navigate("about") },
+                        shape = RoundedCornerShape(topEndPercent = 100, bottomEndPercent = 100)
+                    )
                     NavigationDrawerItem(
                         label = {
                             Row(
