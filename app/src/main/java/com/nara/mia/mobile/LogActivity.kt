@@ -84,7 +84,9 @@ class LogActivity : ComponentActivity() {
                         lifecycleScope.launch(Dispatchers.IO) {
                             val res = Service.configuration.images()
                             Config.images = res.body()
-                            displayContent()
+                            launch(Dispatchers.Main) {
+                                displayContent()
+                            }
                         }
                     }
                     else finish()

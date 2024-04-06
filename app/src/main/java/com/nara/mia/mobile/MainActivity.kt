@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -78,9 +79,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        runBlocking {
-            Config.init(PrefDataStore.get(baseContext)) {
-                setInitialPage()
+        setContent {
+            MiaTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val coroutine = rememberCoroutineScope()
+
+                    LaunchedEffect(key1 = "") {
+                        coroutine.launch(Dispatchers.IO) {
+                            Config.init(PrefDataStore.get(baseContext)) {
+                                setInitialPage()
+                            }
+                        }
+                    }
+                }
             }
         }
     }

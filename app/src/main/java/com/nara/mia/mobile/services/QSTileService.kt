@@ -11,14 +11,13 @@ import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.infrastructure.PrefDataStore
 import com.nara.mia.mobile.infrastructure.isInstanceUrlInitialized
 import com.nara.mia.mobile.infrastructure.isTokenPresent
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-
 
 class QSTileService : TileService() {
     override fun onTileAdded() {
         super.onTileAdded()
         checkInitialized()
-        Config.configChanged += { checkInitialized() }
     }
 
     override fun onClick() {
@@ -43,17 +42,21 @@ class QSTileService : TileService() {
 
     private fun checkInitialized() {
         runBlocking {
-            Config.init(PrefDataStore.get(baseContext)) {
-                if (isInstanceUrlInitialized()) {
-                    val connected = runBlocking {
-                        Http.testConnection(Config.run?.instance)
+            launch {
+                Config.init(PrefDataStore.get(baseContext)) {
+                    if (isInstanceUrlInitialized()) {
+                        val connected = runBlocking {
+                            Http.testConnection(Config.run?.instance)
+                        }
+                        if(connected) {
+                            Service.init()
+                            setInitialized(isTokenPresent())
+                        } else {
+                            setInitialized(false)
+                        }
+                    } else {
+                        setInitialized(false)
                     }
-                    if(connected) {
-                        Service.init()
-                        setInitialized(isTokenPresent())
-                    } else setInitialized(false)
-                } else {
-                    setInitialized(false)
                 }
             }
         }

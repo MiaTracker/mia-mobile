@@ -21,7 +21,6 @@ object Config {
     val const: ConstConfig = ConstConfig()
 
     suspend fun init(dataStore: DataStore<Preferences>, callback: () -> Unit) {
-
         if(run != null) callback()
         run = RunConfig.load(dataStore)
         configChanged += callback
