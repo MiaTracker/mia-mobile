@@ -14,5 +14,5 @@ interface Media {
     suspend fun index(): Response<List<MediaIndex>>
 
     @POST("media/search")
-    suspend fun search(@Query("committed") committed: Boolean, @Body query: SearchQuery): Response<SearchResults>
+    suspend fun search(@Query("committed") committed: Boolean, @Query("limit") limit: Int? = null, @Body query: SearchQuery): Response<SearchResults>
 }

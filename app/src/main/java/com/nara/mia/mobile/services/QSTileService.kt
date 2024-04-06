@@ -41,7 +41,7 @@ class QSTileService : TileService() {
         Config.configChanged -= { checkInitialized() }
     }
 
-    fun checkInitialized() {
+    private fun checkInitialized() {
         runBlocking {
             Config.init(PrefDataStore.get(baseContext)) {
                 if (isInstanceUrlInitialized()) {
@@ -59,7 +59,7 @@ class QSTileService : TileService() {
         }
     }
 
-    fun setInitialized(initialized: Boolean) {
+    private fun setInitialized(initialized: Boolean) {
         if(initialized) {
             qsTile.state = Tile.STATE_INACTIVE
             if(Build.VERSION.SDK_INT >= VERSION_CODES.R)

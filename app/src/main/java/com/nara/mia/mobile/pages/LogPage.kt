@@ -409,18 +409,13 @@ fun MediaSelectionDialog(viewModel: LogViewModel, dismiss: () -> Unit) {
             onActiveChange = { searchActive.value = it },
             Modifier.focusRequester(focusRequester)
         ) {
-            var count = 0 //TODO: remove when paging is implemented
             state.mediaResults?.indexes?.forEach { idx ->
-                count++
-                if(count > 5) return@forEach
                 IndexListItem(idx = idx, external = false) {
                     viewModel.mediaSelected(idx)
                     dismiss()
                 }
             }
             state.mediaResults?.external?.forEach { idx ->
-                count++
-                if(count > 5) return@forEach
                 IndexListItem(idx = idx, external = true) {
                     viewModel.mediaSelected(idx)
                     dismiss()

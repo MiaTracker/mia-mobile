@@ -57,7 +57,7 @@ class LogViewModel : ViewModel() {
             state.copy(mediaQuery = query)
         }
         viewModelScope.launch(Dispatchers.IO) {
-            val res = Service.media.search(false, SearchQuery(query, null, false, null))
+            val res = Service.media.search(false, 5, SearchQuery(query, null, false, null))
             if(!res.isSuccessful) return@launch //TODO: handle
             _state.update { state ->
                 state.copy(

@@ -1,8 +1,6 @@
 package com.nara.mia.mobile.services
 
-import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.infrastructure.isInstanceUrlInitialized
-import kotlinx.coroutines.runBlocking
 
 object Service {
     private var initialized = false
@@ -27,10 +25,5 @@ object Service {
         watchlist = ServiceFactory.create(Watchlist::class)
 
         initialized = true
-
-        runBlocking {
-            val res = configuration.images()
-            Config.images = res.body()
-        }
     }
 }

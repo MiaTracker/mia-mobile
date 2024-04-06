@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.nara.mia.mobile.enums.MediaType
+import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.models.ExternalIndex
 import com.nara.mia.mobile.models.MediaIndex
 import com.nara.mia.mobile.models.SearchQuery
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import retrofit2.Response
 
 data class IndexState(
@@ -28,6 +30,15 @@ abstract class IndexViewModel : ViewModel() {
     val state: StateFlow<IndexState> = _state.asStateFlow()
 
     abstract val multiType: Boolean
+
+    init {
+        if(Config.images == null) {
+            runBlocking {
+                val res = Service.configuration.images()
+                Config.images = res.body()
+            }
+        }
+    }
 
     fun refresh(callback: (() -> Unit)? = null) {
         if(state.value.query.isEmpty()) index(callback)
@@ -97,7 +108,7 @@ class MediaIndexViewModel : IndexViewModel() {
     }
 
     override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.media.search(false, SearchQuery(query, null, false, null))
+        return Service.media.search(false, null, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
