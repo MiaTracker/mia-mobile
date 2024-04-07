@@ -104,7 +104,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                 DockedSearchBar(
                     query = state.query,
                     onQueryChange = { v -> viewModel.applySearch(v) },
-                    onSearch = { },
+                    onSearch = { v -> viewModel.applySearch(v, true) },
                     active = false,
                     onActiveChange = { },
                     trailingIcon = {
@@ -150,7 +150,7 @@ fun IndexPage(viewModel: IndexViewModel, navController: NavController, drawerSta
                     }
 
                     val externalIdxs = state.external
-                    if(externalIdxs != null) {
+                    if(!externalIdxs.isNullOrEmpty()) {
                         item(
                             span = { GridItemSpan(3) }
                         ) {

@@ -22,7 +22,8 @@ import retrofit2.Response
 data class IndexState(
     val index: List<MediaIndex>? = null,
     val external: List<ExternalIndex>? = null,
-    val query: String = ""
+    val query: String = "",
+    val committed: Boolean = false
 )
 
 abstract class IndexViewModel : ViewModel() {
@@ -45,10 +46,11 @@ abstract class IndexViewModel : ViewModel() {
         else search(callback)
     }
 
-    fun applySearch(query: String) {
+    fun applySearch(query: String, committed: Boolean = false) {
         _state.update { state ->
             state.copy(
-                query = query
+                query = query,
+                committed = committed
             )
         }
         refresh()
@@ -81,7 +83,7 @@ abstract class IndexViewModel : ViewModel() {
 
     private fun search(callback: (() -> Unit)?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val res = apiSearch(state.value.query)
+            val res = apiSearch(state.value.query, state.value.committed)
             res.body()?.let { data ->
                 _state.update { state ->
                     state.copy(
@@ -96,7 +98,7 @@ abstract class IndexViewModel : ViewModel() {
     }
 
     abstract suspend fun apiIndex(): Response<List<MediaIndex>>
-    abstract suspend fun apiSearch(query: String): Response<SearchResults>
+    abstract suspend fun apiSearch(query: String, committed: Boolean): Response<SearchResults>
     abstract fun title(): String
 }
 
@@ -107,8 +109,8 @@ class MediaIndexViewModel : IndexViewModel() {
         return Service.media.index()
     }
 
-    override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.media.search(false, null, SearchQuery(query, null, false, null))
+    override suspend fun apiSearch(query: String, committed: Boolean): Response<SearchResults> {
+        return Service.media.search(committed, null, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -123,8 +125,8 @@ class MoviesIndexViewModel : IndexViewModel() {
         return Service.movies.index()
     }
 
-    override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.movies.search(false, SearchQuery(query, null, false, null))
+    override suspend fun apiSearch(query: String, committed: Boolean): Response<SearchResults> {
+        return Service.movies.search(committed, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -139,8 +141,8 @@ class SeriesIndexViewModel : IndexViewModel() {
         return Service.series.index()
     }
 
-    override suspend fun apiSearch(query: String): Response<SearchResults> {
-        return Service.series.search(false, SearchQuery(query, null, false, null))
+    override suspend fun apiSearch(query: String, committed: Boolean): Response<SearchResults> {
+        return Service.series.search(committed, SearchQuery(query, null, false, null))
     }
 
     override fun title(): String {
@@ -155,7 +157,7 @@ class WatchlistViewModel : IndexViewModel() {
         return Service.watchlist.index()
     }
 
-    override suspend fun apiSearch(query: String): Response<SearchResults> {
+    override suspend fun apiSearch(query: String, committed: Boolean): Response<SearchResults> {
         return Service.watchlist.search(SearchQuery(query, null, false, null))
     }
 
