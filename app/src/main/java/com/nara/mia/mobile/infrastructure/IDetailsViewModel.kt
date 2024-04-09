@@ -1,10 +1,13 @@
 package com.nara.mia.mobile.infrastructure
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavController
 import com.nara.mia.mobile.models.Log
 import com.nara.mia.mobile.models.Source
 
 interface IDetailsViewModel {
+    val snackbarHostState: SnackbarHostState
+
     fun refresh(callback: () -> Unit)
 
     fun delete(navController: NavController)

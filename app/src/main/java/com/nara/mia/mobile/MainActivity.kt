@@ -26,6 +26,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -117,22 +118,26 @@ class MainActivity : ComponentActivity() {
     private fun setLoginPage() {
         setContent {
             MiaTheme {
-                // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Scaffold { innerPadding ->
+                    val viewModel = viewModel(
+                        initializer = {
+                            LoginViewModel({
+                                setNavigation()
+                            }, {
+                                setInstanceSelectionPage()
+                            })
+                        }
+                    )
+                    
+                    Scaffold(
+                        snackbarHost = { SnackbarHost(hostState = viewModel.snackbarHostState) }
+                    ) { innerPadding ->
                         LoginPage(
-                            viewModel(
-                                initializer = {
-                                    LoginViewModel({
-                                        setNavigation()
-                                    }, {
-                                        setInstanceSelectionPage()
-                                    })
-                                }
-                            ),
+                            viewModel,
                             innerPadding
                         )
                     }
@@ -144,7 +149,6 @@ class MainActivity : ComponentActivity() {
     private fun setNavigation() {
         setContent {
             MiaTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -241,7 +245,9 @@ fun Navigation() {
             )
         }
         composable("log") {
-            LogPage { navController.popBackStack() }
+            BasePage(navController = navController) { drawerState ->
+                LogPage(drawerState = drawerState) { navController.navigate("log") }
+            }
         }
         composable("about") {
             BasePage(navController = navController) { drawerState ->

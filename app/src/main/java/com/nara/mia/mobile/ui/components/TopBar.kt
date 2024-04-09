@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, drawerState: DrawerState? = null, actions: @Composable (RowScope.() -> Unit) = { }, title: @Composable () -> Unit) {
+fun TopBar(navController: NavController? = null, drawerState: DrawerState? = null, actions: @Composable (RowScope.() -> Unit) = { }, title: @Composable () -> Unit) {
     val scope = rememberCoroutineScope()
 
     TopAppBar(
@@ -35,7 +35,7 @@ fun TopBar(navController: NavController, drawerState: DrawerState? = null, actio
                     )
                 }
             } else {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { navController?.popBackStack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow back"

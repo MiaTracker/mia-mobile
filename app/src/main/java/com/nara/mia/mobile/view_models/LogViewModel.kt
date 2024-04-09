@@ -1,6 +1,5 @@
 package com.nara.mia.mobile.view_models
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.enums.SourceType
@@ -42,7 +41,7 @@ data class LogState(
     val comment: String? = null
 )
 
-class LogViewModel : ViewModel() {
+class LogViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(LogState())
     val state: StateFlow<LogState> = _state.asStateFlow()
 
@@ -58,11 +57,13 @@ class LogViewModel : ViewModel() {
         }
         viewModelScope.launch(Dispatchers.IO) {
             val res = Service.media.search(false, 5, SearchQuery(query, null, false, null))
-            if(!res.isSuccessful) return@launch //TODO: handle
-            _state.update { state ->
-                state.copy(
-                    mediaResults = res.body()
-                )
+            res.errorBody()?.let { err -> handleErrors(err) }
+            res.body()?.let { results ->
+                _state.update { state ->
+                    state.copy(
+                        mediaResults = results
+                    )
+                }
             }
         }
     }
@@ -92,34 +93,36 @@ class LogViewModel : ViewModel() {
             if(idx !is MediaIndex) return@launch
             val res = if(state.value.index!!.type == MediaType.Movie) Service.movies.sources(idx.id)
                 else Service.series.sources(idx.id)
-            val sources = res.body()
-            if(!res.isSuccessful || sources == null) return@launch //TODO: handle
-            val source = if (_state.value.source != null && sources.any { x -> x.id == _state.value.source?.id }) {
-                _state.value.source
-            } else if(sources.count() == 1) { sources[0] }
-            else { null }
-            _state.update { state ->
-                state.copy(
-                    sources = sources,
-                    source = source
-                )
+            res.errorBody()?.let { err -> handleErrors(err) }
+            res.body()?.let { sources ->
+                val source = if (_state.value.source != null && sources.any { x -> x.id == _state.value.source?.id }) {
+                    _state.value.source
+                } else if(sources.count() == 1) { sources[0] }
+                else { null }
+                _state.update { state ->
+                    state.copy(
+                        sources = sources,
+                        source = source
+                    )
+                }
             }
         }
     }
 
-    fun refreshOnWatchlist() {
+    private fun refreshOnWatchlist() {
         viewModelScope.launch(Dispatchers.IO) {
             val idx = state.value.index
             if(idx !is MediaIndex) return@launch
             val res = if(state.value.index!!.type == MediaType.Movie) Service.movies.onWatchlist(idx.id)
             else Service.series.onWatchlist(idx.id)
-            val onWatchlist = res.body()
-            if(!res.isSuccessful || onWatchlist == null) return@launch //TODO: handle
-            if(onWatchlist != state.value.onWatchlist) {
-                _state.update { state ->
-                    state.copy(
-                        onWatchlist = onWatchlist
-                    )
+            res.errorBody()?.let { err -> handleErrors(err) }
+            res.body()?.let { onWatchlist ->
+                if(onWatchlist != state.value.onWatchlist) {
+                    _state.update { state ->
+                        state.copy(
+                            onWatchlist = onWatchlist
+                        )
+                    }
                 }
             }
         }
@@ -229,7 +232,7 @@ class LogViewModel : ViewModel() {
             )
 
             val res = Service.logset.create(model)
-            if(!res.isSuccessful) return@launch //TODO: handle
+            res.errorBody()?.let { err -> handleErrors(err) }
         }
     }
 }

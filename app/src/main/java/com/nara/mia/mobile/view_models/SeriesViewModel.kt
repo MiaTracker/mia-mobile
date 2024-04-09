@@ -1,6 +1,5 @@
 package com.nara.mia.mobile.view_models
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.nara.mia.mobile.infrastructure.IDetailsViewModel
@@ -25,42 +24,54 @@ data class SeriesState(
     val series: SeriesDetails? = null,
 )
 
-class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
+class SeriesViewModel(private val id: Int) : BaseViewModel(), IDetailsViewModel {
     private val _state = MutableStateFlow(SeriesState())
     val state: StateFlow<SeriesState> = _state.asStateFlow()
 
     override fun refresh(callback: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             val res = Service.series.details(id)
-            _state.update { state ->
-                state.copy(
-                    series = res.body(),
-                )
+            res.errorBody()?.let { err -> handleErrors(err) }
+            res.body()?.let { series ->
+                _state.update { state ->
+                    state.copy(
+                        series = series
+                    )
+                }
+                callback()
             }
-            callback()
         }
     }
 
     override fun delete(navController: NavController) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.delete(_state.value.series?.id ?: return@launch)
-            viewModelScope.launch(Dispatchers.Main) {
-                navController.popBackStack()
+            val res = Service.series.delete(_state.value.series?.id ?: return@launch)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                viewModelScope.launch(Dispatchers.Main) {
+                    navController.popBackStack()
+                }
             }
         }
     }
 
     override fun deleteSource(source: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.deleteSource(_state.value.series?.id ?: return@launch, source)
-            refresh { }
+            val res = Service.series.deleteSource(_state.value.series?.id ?: return@launch, source)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun deleteLog(log: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.deleteLog(_state.value.series?.id ?: return@launch, log)
-            refresh { }
+            val res = Service.series.deleteLog(_state.value.series?.id ?: return@launch, log)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
@@ -70,7 +81,7 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
 
     override fun saveSource(source: Source, callback: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            if(source.id < 0)
+            val res = if(source.id < 0)
                 Service.series.sourceCreate(state.value.series?.id ?: return@launch, SourceCreate(
                     name = source.name,
                     url = source.url,
@@ -78,7 +89,10 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
                 ))
             else
                 Service.series.sourceUpdate(state.value.series?.id ?: return@launch, source.id, source)
-            refresh(callback)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh(callback)
+            }
         }
     }
 
@@ -89,7 +103,7 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     override fun saveLog(log: Log, callback: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             if(!isLogValid(log)) return@launch
-            if(log.id < 0)
+            val res = if(log.id < 0)
                 Service.series.logCreate(state.value.series?.id ?: return@launch, LogCreate(
                     source = log.source,
                     date = log.date,
@@ -99,73 +113,103 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
                 ))
             else
                 Service.series.logUpdate(state.value.series?.id ?: return@launch, log.id, log)
-            refresh(callback)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh(callback)
+            }
         }
     }
 
     override fun createTitle(title: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if(title.isEmpty()) return@launch
-            Service.series.titleCreate(state.value.series?.id ?: return@launch, TitleCreate(title))
-            refresh { }
+            val res = Service.series.titleCreate(state.value.series?.id ?: return@launch, TitleCreate(title))
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun setPrimaryTitle(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.titleSetPrimary(state.value.series?.id ?: return@launch, id)
-            refresh { }
+            val res = Service.series.titleSetPrimary(state.value.series?.id ?: return@launch, id)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun deleteTitle(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.titleDelete(state.value.series?.id ?: return@launch, id)
-            refresh { }
+            val res = Service.series.titleDelete(state.value.series?.id ?: return@launch, id)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun createGenre(genre: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if(genre.isEmpty()) return@launch
-            Service.series.genreCreate(state.value.series?.id ?: return@launch, GenreCreate(genre))
-            refresh { }
+            val res = Service.series.genreCreate(state.value.series?.id ?: return@launch, GenreCreate(genre))
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun deleteGenre(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.genreDelete(state.value.series?.id ?: return@launch, id)
-            refresh { }
+            val res = Service.series.genreDelete(state.value.series?.id ?: return@launch, id)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun createTag(tag: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if(tag.isEmpty()) return@launch
-            Service.series.tagCreate(state.value.series?.id ?: return@launch, TagCreate(tag))
-            refresh { }
+            val res = Service.series.tagCreate(state.value.series?.id ?: return@launch, TagCreate(tag))
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun deleteTag(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.series.tagDelete(state.value.series?.id ?: return@launch, id)
-            refresh { }
+            val res = Service.series.tagDelete(state.value.series?.id ?: return@launch, id)
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun addToWatchlist() {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.watchlist.add(WatchlistParams(state.value.series?.id ?: return@launch))
-            refresh {  }
+            val res = Service.watchlist.add(WatchlistParams(state.value.series?.id ?: return@launch))
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 
     override fun removeFromWatchlist() {
         viewModelScope.launch(Dispatchers.IO) {
-            Service.watchlist.remove(WatchlistParams(state.value.series?.id ?: return@launch))
-            refresh {  }
+            val res = Service.watchlist.remove(WatchlistParams(state.value.series?.id ?: return@launch))
+            res.errorBody()?.let { err -> handleErrors(err) }
+            if(res.isSuccessful) {
+                refresh { }
+            }
         }
     }
 }

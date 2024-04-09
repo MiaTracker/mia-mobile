@@ -29,6 +29,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
@@ -180,7 +181,8 @@ fun Details(media: IMediaDetails?, navController: NavController, viewModel: IDet
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = viewModel.snackbarHostState) }
     ) { padding ->
         Box(modifier = Modifier
             .fillMaxSize()

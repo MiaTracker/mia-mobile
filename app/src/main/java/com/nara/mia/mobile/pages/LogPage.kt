@@ -26,6 +26,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DockedSearchBar
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -37,7 +38,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -68,6 +71,7 @@ import com.nara.mia.mobile.enums.MediaType
 import com.nara.mia.mobile.enums.SourceType
 import com.nara.mia.mobile.infrastructure.TmdbImageType
 import com.nara.mia.mobile.models.IIndex
+import com.nara.mia.mobile.ui.components.TopBar
 import java.time.Clock
 import java.time.Instant
 import java.util.Calendar
@@ -75,7 +79,7 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogPage(viewModel: LogViewModel = viewModel(), onClose: () -> Unit) {
+fun LogPage(viewModel: LogViewModel = viewModel(), drawerState: DrawerState? = null, onClose: () -> Unit) {
     val state by viewModel.state.collectAsState()
 
     var openDialog by remember { mutableStateOf(false) }
@@ -102,124 +106,67 @@ fun LogPage(viewModel: LogViewModel = viewModel(), onClose: () -> Unit) {
     val dateFieldInteractionState by dateFieldInteractionSource.collectIsPressedAsState()
     var starsString by remember { mutableStateOf(if(state.stars == null) { "" } else { state.stars.toString() }) }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.padding(10.dp)
-    ) {
-        Box(
+    Scaffold(
+        topBar = { if(drawerState != null) TopBar(drawerState = drawerState, title = { Text(text = "Log") }) },
+        snackbarHost = { SnackbarHost(hostState = viewModel.snackbarHostState) }
+    ) { innerPadding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .height(90.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                    shape = RoundedCornerShape(5.dp)
-                )
-                .clickable {
-                    openDialog = true
-                }
+                .padding(innerPadding)
+                .padding(10.dp)
         ) {
-            if(state.index != null) {
-                IndexListItem(
-                    idx = state.index!!,
-                    external = state.externalIndex,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-            } else {
-                Text(
-                    text = "Select media",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 10.dp)
-                )
-            }
-        }
-
-        if(state.index != null && state.source == null) {
-            HorizontalDivider()
-        }
-        Row(
-            Modifier.fillMaxWidth()
-        ) {
-            ExposedDropdownMenuBox(
-                expanded = sourceExpanded,
-                onExpandedChange = { if(state.index != null) sourceExpanded = it },
-                Modifier.weight(1.0f)
-            ) {
-                TextField(
-                    value = state.source?.name ?: "New source",
-                    enabled = state.index != null,
-                    readOnly = true,
-                    onValueChange = { },
-                    label = { Text(text = "Source") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = sourceExpanded,
-                    onDismissRequest = { sourceExpanded = false },
-                    Modifier.fillMaxWidth()
-                ) {
-                    state.sources?.forEach { source ->
-                        DropdownMenuItem(
-                            text = { Text(text = source.name) },
-                            onClick = {
-                                viewModel.sourceSelected(source)
-                                sourceExpanded = false
-                            },
-                            Modifier.fillMaxWidth()
-                        )
+            Box(
+                modifier = Modifier
+                    .height(90.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .clickable {
+                        openDialog = true
                     }
-                    DropdownMenuItem(
-                        text = { Text(text = "New source") },
-                        onClick = {
-                            viewModel.sourceSelected(null)
-                            sourceExpanded = false
-                        },
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "New source")
-                        },
-                        modifier = Modifier.fillMaxWidth()
+            ) {
+                if(state.index != null) {
+                    IndexListItem(
+                        idx = state.index!!,
+                        external = state.externalIndex,
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                } else {
+                    Text(
+                        text = "Select media",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .padding(start = 10.dp)
                     )
                 }
             }
 
-            IconButton(
-                onClick = { viewModel.refreshSources() },
-                enabled = state.index != null,
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+            if(state.index != null && state.source == null) {
+                HorizontalDivider()
             }
-        }
-
-        if(state.index != null && state.source == null) {
-            TextField(
-                value = state.newSourceName,
-                onValueChange = { viewModel.setNewSourceName(it) },
-                label = { Text("Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Box {
+            Row(
+                Modifier.fillMaxWidth()
+            ) {
                 ExposedDropdownMenuBox(
-                    expanded = newSourceTypeExpanded,
-                    onExpandedChange = { newSourceTypeExpanded = it }
+                    expanded = sourceExpanded,
+                    onExpandedChange = { if(state.index != null) sourceExpanded = it },
+                    Modifier.weight(1.0f)
                 ) {
                     TextField(
-                        value = state.newSourceType?.toString() ?: "",
+                        value = state.source?.name ?: "New source",
+                        enabled = state.index != null,
                         readOnly = true,
                         onValueChange = { },
-                        label = { Text(text = "Type") },
+                        label = { Text(text = "Source") },
                         trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = newSourceTypeExpanded)
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = sourceExpanded)
                         },
                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
                         modifier = Modifier
@@ -227,140 +174,206 @@ fun LogPage(viewModel: LogViewModel = viewModel(), onClose: () -> Unit) {
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
-                        expanded = newSourceTypeExpanded,
-                        onDismissRequest = { newSourceTypeExpanded = false },
+                        expanded = sourceExpanded,
+                        onDismissRequest = { sourceExpanded = false },
                         Modifier.fillMaxWidth()
                     ) {
-                        enumValues<SourceType>().forEach { type ->
+                        state.sources?.forEach { source ->
                             DropdownMenuItem(
-                                text = { Text(text = type.toString()) },
+                                text = { Text(text = source.name) },
                                 onClick = {
-                                    viewModel.newSourceTypeSelected(type)
-                                    newSourceTypeExpanded = false
+                                    viewModel.sourceSelected(source)
+                                    sourceExpanded = false
                                 },
                                 Modifier.fillMaxWidth()
                             )
                         }
+                        DropdownMenuItem(
+                            text = { Text(text = "New source") },
+                            onClick = {
+                                viewModel.sourceSelected(null)
+                                sourceExpanded = false
+                            },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Default.Add, contentDescription = "New source")
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
+                }
+
+                IconButton(
+                    onClick = { viewModel.refreshSources() },
+                    enabled = state.index != null,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
                 }
             }
 
-            Row {
+            if(state.index != null && state.source == null) {
                 TextField(
-                    value = state.newSourceUrl,
-                    onValueChange = { viewModel.setNewSourceUrl(it) },
-                    label = { Text("Url") },
+                    value = state.newSourceName,
+                    onValueChange = { viewModel.setNewSourceName(it) },
+                    label = { Text("Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-
-            HorizontalDivider()
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            TextField(
-                value = state.dateString,
-                readOnly = true,
-                interactionSource = dateFieldInteractionSource,
-                onValueChange = { },
-                label = { Text(text = "Date") },
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_calendar_month_24),
-                        contentDescription = "Open calendar",
-                    )
-                },
-                colors = ExposedDropdownMenuDefaults.textFieldColors()
-            )
-            TextField(
-                label = { Text(text = "Stars") },
-                value = starsString,
-                onValueChange = { v ->
-                    starsString = if(v.isEmpty()) {
-                        viewModel.setStars(null)
-                        ""
-                    } else {
-                        when(val f = v.toFloatOrNull()) {
-                            null -> starsString
-                            else -> {
-                                viewModel.setStars(f)
-                                v
+                Box {
+                    ExposedDropdownMenuBox(
+                        expanded = newSourceTypeExpanded,
+                        onExpandedChange = { newSourceTypeExpanded = it }
+                    ) {
+                        TextField(
+                            value = state.newSourceType?.toString() ?: "",
+                            readOnly = true,
+                            onValueChange = { },
+                            label = { Text(text = "Type") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = newSourceTypeExpanded)
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = newSourceTypeExpanded,
+                            onDismissRequest = { newSourceTypeExpanded = false },
+                            Modifier.fillMaxWidth()
+                        ) {
+                            enumValues<SourceType>().forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(text = type.toString()) },
+                                    onClick = {
+                                        viewModel.newSourceTypeSelected(type)
+                                        newSourceTypeExpanded = false
+                                    },
+                                    Modifier.fillMaxWidth()
+                                )
                             }
                         }
                     }
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal
-                )
-            )
-        }
+                }
 
-        TextField(
-            label = { Text("Comment") },
-            value = state.comment ?: "",
-            onValueChange = { viewModel.setComment(it) },
-            minLines = 2,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier
-                    .toggleable(
-                        value = state.completed,
-                        onValueChange = { viewModel.setCompleted(it) },
-                        role = Role.Checkbox
+                Row {
+                    TextField(
+                        value = state.newSourceUrl,
+                        onValueChange = { viewModel.setNewSourceUrl(it) },
+                        label = { Text("Url") },
+                        modifier = Modifier.fillMaxWidth()
                     )
+                }
+
+                HorizontalDivider()
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Checkbox(checked = state.completed, onCheckedChange = null)
-                Text(
-                    text = "Completed",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                TextField(
+                    value = state.dateString,
+                    readOnly = true,
+                    interactionSource = dateFieldInteractionSource,
+                    onValueChange = { },
+                    label = { Text(text = "Date") },
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_calendar_month_24),
+                            contentDescription = "Open calendar",
+                        )
+                    },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+                TextField(
+                    label = { Text(text = "Stars") },
+                    value = starsString,
+                    onValueChange = { v ->
+                        starsString = if(v.isEmpty()) {
+                            viewModel.setStars(null)
+                            ""
+                        } else {
+                            when(val f = v.toFloatOrNull()) {
+                                null -> starsString
+                                else -> {
+                                    viewModel.setStars(f)
+                                    v
+                                }
+                            }
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    )
                 )
             }
-            
-            if(state.onWatchlist) {
+
+            TextField(
+                label = { Text("Comment") },
+                value = state.comment ?: "",
+                onValueChange = { viewModel.setComment(it) },
+                minLines = 2,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier
                         .toggleable(
-                            value = state.removeFromWatchlist,
-                            onValueChange = { viewModel.setRemoveFromWatchlist(it) },
+                            value = state.completed,
+                            onValueChange = { viewModel.setCompleted(it) },
                             role = Role.Checkbox
                         )
                 ) {
-                    Checkbox(checked = state.removeFromWatchlist, onCheckedChange = null)
+                    Checkbox(checked = state.completed, onCheckedChange = null)
                     Text(
-                        text = "Remove from watchlist",
+                        text = "Completed",
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
                 }
+
+                if(state.onWatchlist) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .toggleable(
+                                value = state.removeFromWatchlist,
+                                onValueChange = { viewModel.setRemoveFromWatchlist(it) },
+                                role = Role.Checkbox
+                            )
+                    ) {
+                        Checkbox(checked = state.removeFromWatchlist, onCheckedChange = null)
+                        Text(
+                            text = "Remove from watchlist",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                    }
+                }
             }
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedButton(onClick = { onClose() }) {
-                Text("Cancel")
-            }
-            Button(
-                onClick = {
-                    viewModel.save()
-                    onClose()
-                },
-                enabled = viewModel.filled()
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save")
+                if(drawerState == null) {
+                    OutlinedButton(onClick = { onClose() }) {
+                        Text("Cancel")
+                    }
+                }
+                Button(
+                    onClick = {
+                        viewModel.save()
+                        onClose()
+                    },
+                    enabled = viewModel.filled()
+                ) {
+                    Text("Save")
+                }
             }
         }
     }
@@ -446,7 +459,9 @@ fun IndexListItem(idx: IIndex, external: Boolean, modifier: Modifier = Modifier,
                 painter = tmdbImagePainter(idx.posterPath, 60.dp, TmdbImageType.Poster),
                 contentDescription = "Poster",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.width(60.dp).height(90.dp)
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(90.dp)
             )
         },
         trailingContent = {

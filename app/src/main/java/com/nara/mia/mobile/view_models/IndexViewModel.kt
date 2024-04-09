@@ -1,6 +1,5 @@
 package com.nara.mia.mobile.view_models
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.nara.mia.mobile.enums.MediaType
@@ -26,7 +25,7 @@ data class IndexState(
     val committed: Boolean = false
 )
 
-abstract class IndexViewModel : ViewModel() {
+abstract class IndexViewModel : BaseViewModel() {
     private val _state = MutableStateFlow(IndexState())
     val state: StateFlow<IndexState> = _state.asStateFlow()
 
@@ -59,39 +58,46 @@ abstract class IndexViewModel : ViewModel() {
     fun create(idx: ExternalIndex, navController: NavController) {
         viewModelScope.launch(Dispatchers.IO) {
             if(idx.type == MediaType.Movie) {
-                val res = Service.movies.create(idx.externalId) //TODO: handle
+                val res = Service.movies.create(idx.externalId)
+                res.errorBody()?.let { err -> handleErrors(err) }
                 res.body()?.let { id ->
                     viewModelScope.launch(Dispatchers.Main) {
                         navController.navigate("movie/${id}")
                     }
+                    refresh()
                 }
             } else {
-                val res = Service.series.create(idx.externalId) //TODO: handle
+                val res = Service.series.create(idx.externalId)
+                res.errorBody()?.let { err -> handleErrors(err) }
                 res.body()?.let { id ->
                     viewModelScope.launch(Dispatchers.Main) {
                         navController.navigate("series/${id}")
                     }
+                    refresh()
                 }
             }
-            refresh()
         }
     }
 
     private fun index(callback: (() -> Unit)?) {
         viewModelScope.launch(Dispatchers.IO) {
             val res = apiIndex()
-            _state.update { state ->
-                state.copy(
-                    index = res.body() ?: emptyList(),
-                )
+            res.errorBody()?.let { err -> handleErrors(err) }
+            res.body()?.let { idx ->
+                _state.update { state ->
+                    state.copy(
+                        index = idx,
+                    )
+                }
+                callback?.invoke()
             }
-            callback?.invoke()
         }
     }
 
     private fun search(callback: (() -> Unit)?) {
         viewModelScope.launch(Dispatchers.IO) {
             val res = apiSearch(state.value.query, state.value.committed)
+            res.errorBody()?.let { err -> handleErrors(err) }
             res.body()?.let { data ->
                 _state.update { state ->
                     state.copy(

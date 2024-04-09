@@ -1,6 +1,5 @@
 package com.nara.mia.mobile.view_models
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nara.mia.mobile.infrastructure.Config
 import com.nara.mia.mobile.infrastructure.StatusCode
@@ -27,7 +26,7 @@ data class LoginState(
     }
 }
 
-class LoginViewModel(private val loginCallback: () -> Unit, private val instanceChangeCallback: () -> Unit) : ViewModel() {
+class LoginViewModel(private val loginCallback: () -> Unit, private val instanceChangeCallback: () -> Unit) : BaseViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
@@ -57,14 +56,16 @@ class LoginViewModel(private val loginCallback: () -> Unit, private val instance
             val user = UserLogin(_state.value.username, _state.value.password)
             val res = Service.users.login(user)
             if(res.isSuccessful) {
-                val token = res.body() ?: return@launch  //TODO: handle
-                _state.update { state ->
-                    state.copy(
-                        state = LoginState.StateEnum.None
-                    )
+                res.errorBody()?.let { err -> handleErrors(err) }
+                res.body()?.let { token ->
+                    _state.update { state ->
+                        state.copy(
+                            state = LoginState.StateEnum.None
+                        )
+                    }
+                    Config.run?.setToken(token)
+                    loginCallback()
                 }
-                Config.run?.setToken(token)
-                loginCallback()
             } else if(res.code() == StatusCode.Unauthorized.code) {
                 _state.update { state ->
                     state.copy(
@@ -72,7 +73,7 @@ class LoginViewModel(private val loginCallback: () -> Unit, private val instance
                     )
                 }
             } else {
-                //TODO: handling unexpected errors
+                res.errorBody()?.let { err -> handleErrors(err) }
             }
         }
     }
