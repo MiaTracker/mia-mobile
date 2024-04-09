@@ -44,7 +44,9 @@ class SeriesViewModel(private val id: Int) : ViewModel(), IDetailsViewModel {
     override fun delete(navController: NavController) {
         viewModelScope.launch(Dispatchers.IO) {
             Service.series.delete(_state.value.series?.id ?: return@launch)
-            navController.popBackStack()
+            viewModelScope.launch(Dispatchers.Main) {
+                navController.popBackStack()
+            }
         }
     }
 

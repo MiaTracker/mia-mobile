@@ -60,10 +60,18 @@ abstract class IndexViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             if(idx.type == MediaType.Movie) {
                 val res = Service.movies.create(idx.externalId) //TODO: handle
-                res.body()?.let { id -> navController.navigate("movie/${id}") }
+                res.body()?.let { id ->
+                    viewModelScope.launch(Dispatchers.Main) {
+                        navController.navigate("movie/${id}")
+                    }
+                }
             } else {
                 val res = Service.series.create(idx.externalId) //TODO: handle
-                res.body()?.let { id -> navController.navigate("series/${id}") }
+                res.body()?.let { id ->
+                    viewModelScope.launch(Dispatchers.Main) {
+                        navController.navigate("series/${id}")
+                    }
+                }
             }
             refresh()
         }

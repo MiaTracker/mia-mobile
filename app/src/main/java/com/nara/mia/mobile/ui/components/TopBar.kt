@@ -35,7 +35,7 @@ fun TopBar(navController: NavController, drawerState: DrawerState? = null, actio
                     )
                 }
             } else {
-                IconButton(onClick = { scope.launch { navController.popBackStack() } }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Arrow back"
